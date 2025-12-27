@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#SBATCH -p hawkcpu
+#SBATCH -n 1
+#SBATCH -N 1
+#SBATCH -t 10
+#SBATCH -J genericrscript
+#SBATCH -o /share/ceph/wym219group/shared/erroutfiles/genericrscript.%j.%N.out
+#SBATCH --open-mode=append
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=mit221@lehigh.edu
+
+#The lines above are slurm inputs. Anything else starting with a # is a comment.
+
+#Usage: sbatch runRERmt.slr <R script name>
+
+# This loads the r module
+module load r
+
+#set wd to where the submission was created
+cd ${SLURM_SUBMIT_DIR}
+
+SCRIPTNAME=$1 #This is the first input after the submission script name
+
+SCRIPTDIR="/home/mit221"
+
+#Print the script name to the output file
+echo $SCRIPTNAME
+
+#Run the R script, printing out any errors or warnings
+Rscript --verbose $SCRIPTDIR/$SCRIPTNAME
+

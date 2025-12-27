@@ -1,0 +1,88 @@
+#!/bin/bash
+
+#SBATCH -p hawkcpu
+#SBATCH -n 1
+#SBATCH -N 1
+#SBATCH -t 10
+#SBATCH -J genericrscript
+#SBATCH -o /share/ceph/wym219group/shared/erroutfiles/michaelTene/%j.%N.out
+#SBATCH --open-mode=append
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=mit221@lehigh.edu
+
+#Usage: 
+#Cd to the project's main directory 
+#sbatch runRERmt.slr <Project name> <R script name> <Argument 1> <Agument 2> <etc.>
+
+SEE LOG FOR ISSUES WITH SCRIPT
+
+
+FILEPREFIX=$1
+
+#set wd to where the main run script is 
+cd /share/ceph/hawk/wym219_123121/shared/mit221
+
+
+
+jid1=$(sbatch -t 1440 -J=$FILEPREFIX-RERs runScriptSecondPartition.slr RunRERBinaryMT RunRERAndCorrelation.R r=$FILEPREFIX s=b)
+echo "RER Job"
+echo $jid1
+
+i=1
+j=$(($i/2)); jid2=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+i=2
+j=$(($i/2)); jid3=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+i=3
+j=$(($i/2)); jid4=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+i=4
+j=$(($i/2)); jid5=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+i=5
+j=$(($i/2)); jid6=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+for i in `seq 6 197`; do 
+j=$(($i/2)); sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T; 
+done
+
+i=198
+j=$(($i/2)); jid7=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+i=199
+j=$(($i/2)); jid8=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+i=200
+j=$(($i/2)); jid9=$(sbatch -t 1650 --job-name=$FILEPREFIX-perm-$j --dependency <singleton, afterok:$jid1> runScriptSecondPartition.slr RunRERBinaryMT RunPermulationsFastScript.R r=$FILEPREFIX n=3300 i=$i p=T); 
+done
+
+echo"Permulations Jobs"
+echo $jid2
+echo $jid9
+
+jid10 = (sbatch -p hawkmem -n 20 -t 2400 -J $FILEPREFIX-CombinePerms --dependency afterok:$jid2:$jid3:$jid4:$jid5:$jid6:$jid7:$jid8:$jid9  runScriptSecondPartition.slr RunRERBinaryMT CombinePermulationsNew.R r=$FILEPREFIX n=200 c=F t=PrunedFast)
+
+i=1
+s=$((1+$i*17000/5)); n=$((17000/5)); 
+jid11=$(sbatch -p hawkmem -n 20 -J $FILEPREFIX-PValueCalculation-$i -t 600 --dependency afterok:$jid10 runScriptSecondPartition.slr RunRERBinaryMT calculateCombinePermulationsPValues.R r=$FILEPREFIX e=F p=T g=T c=F s=$s n=$n;)
+
+
+
+
+
+#Collect additional Arguments 
+ARG1=$3
+ARG2=$4
+ARG3=$5
+ARG4=$6
+ARG5=$7
+ARG6=$8
+ARG7=$9

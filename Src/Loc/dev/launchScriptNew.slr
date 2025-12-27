@@ -1,0 +1,49 @@
+#!/bin/bash
+
+#SBATCH -p hawkcpu
+#SBATCH -n 1
+#SBATCH -N 1
+#SBATCH -t 10
+#SBATCH -J genericrscript
+#SBATCH -o /share/ceph/wym219group/shared/erroutfiles/michaelTene/%j.%N.out
+#SBATCH --open-mode=append
+#SBATCH --mail-type=ALL
+#SBATCH --mail-user=mit221@lehigh.edu
+
+#The lines above are slurm inputs. Anything else starting with a # is a comment.
+
+#Usage: 
+#Cd to the project's main directory 
+#sbatch runRERmt.slr <Project name> <R script name> <Argument 1> <Agument 2> <etc.>
+
+# This loads the r modu
+module load r
+
+
+
+PROJECTNAME=$1 #This is the first input after the submission script name
+SCRIPTNAME=$2 #This is the second input after the submission script name
+
+#set wd to where the submission was created
+cd /share/ceph/wym219group/shared/MichaelTene/Projects/$PROJECTNAME
+
+SCRIPTDIR=""
+
+#Print the script name to the output file
+echo Project: $PROJECTNAME
+echo Script: $SCRIPTNAME
+echo Path: </share/ceph/wym219group/shared/MichaelTene/Projects/$PROJECTNAME/Src/Loc/$SCRIPTNAME
+
+#Collect additional Arguments 
+ARG1=$3
+ARG2=$4
+ARG3=$5
+ARG4=$6
+ARG5=$7
+ARG6=$8
+ARG7=$9
+
+
+
+#Run the R script, printing out any errors or warnings
+R --verbose --no-save --args $ARG1 $ARG2 $ARG3 $ARG4 $ARG5 $ARG6 $ARG7 </share/ceph/hawk/wym219_123121/shared/mit221/projects/$PROJECTNAME/src/loc/$SCRIPTNAME
