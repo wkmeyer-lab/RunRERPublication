@@ -15,10 +15,10 @@ child.tbl_tree <- utils::getFromNamespace("child.tbl_tree", "tidytree")
 parent.tbl_tree <- utils::getFromNamespace("parent.tbl_tree", "tidytree")
 
 
-args =c("r=CategoricalInsVertivoreTree", 'p=c("#1b9e77", "#7570b3", "#000000", "#d95f02")', 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
+args =c("r=CategoricalInsVertivoreTree", 'p=c("#1b9e77", "#7570b3", "#000000", "#e7298a")', 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
 args =c("r=makeLalithaTree", 'p=c("#1b9e77", "#7570b3", "#000000")', 'c=c("1", "2", "3")', 'n=ZoonomiaTip', "l=Phen", "i= T")
 
-args =c("r=CategoricalInsVertivoreTreeLiamInference", 'p=c("#1b9e77", "#7570b3", "#000000", "#d95f02")', 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
+args =c("r=CategoricalInsVertivoreTreeLiamInference", 'p=c("#1b9e77", "#7570b3", "#000000", "#e7298a")', 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
 
 
 
@@ -54,7 +54,7 @@ args =c("r=CategoricalInsVertivoreTreeLiamInference", 'p=c("#1b9e77", "#7570b3",
 # -- Argument imports --- 
 {
   mainTreesLocation = "Data/zoonomiaAllMammalsTrees.rds"
-  palette(c( "#1b9e77", "#7570b3", "#000000", "#d95f02"))
+  palette(c( "#1b9e77", "#7570b3", "#000000", "#e7298a"))
   spreadSheetLocation = "Data/mergedData.csv"
   nameColumn = "tipName"
   CategoryReplacements = NULL
