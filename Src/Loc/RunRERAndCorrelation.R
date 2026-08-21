@@ -13,62 +13,19 @@ library(data.table)
 # It inputs a phenotype tree made by the appropriate script for the style, and outputs an RER file, a Paths file, and a Correlation file. 
 
 # -- Command arguments list
-# r = filePrefix                                                               This is a prefix used to organize and separate files by analysis run. Always required. 
+# r = filePrefix                                                               REQUIRED: This is a prefix used to organize and separate files by analysis run. Always required. 
+# m = mainTreeFilename.txt or .rds                                             REQUIRED: This sets the location of the maintrees file
 # v = <T or F>                                                                 This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
-# m = mainTreeFilename.txt or .rds                                             This sets the location of the maintrees file
-# p = phenotypeTreeFilename.txt or .rds                                        This can be used to manually override the phenotype tree being used. For continuous analyses, this is the location of the trait vector.
-# f = speciesFilterText                                                        This can be used to manually specify a species filer; leave blank for automatic
-# s = < ["b" or "binary"] or ["c" or "continuous"] or ["g" or "categorical"]>  This prefix is used to set the type of phenotype being supplied
+# s = < ["b" or "binary"] or ["c" or "continuous"] or ["g" or "categorical"]>  This prefix is used to set the type of phenotype being supplied; it will detect automatically if not specified.
 # c = < "diff" or "mean" or "last" >                                           This is used for continuous traits, to determine if the metic should be the difference between the nodes (diff), the mean(mean of the two nodes), or last(the downstream value). Note that Mean and Last are not phylogenetically independent, and do not have downstream processing. 
 # l = <min.sp value>                                                           This sets the min.sp value to be used in the correlation. 
+# f = speciesFilterText                                                        OPTIONAL OVERRIDE: This can be used to manually specify a species filer; leave blank for automatic
+# p = phenotypeTreeFilename.txt or .rds                                        OPTIONAL OVERRIDE: This can be used to manually override the phenotype tree being used. For continuous analyses, this is the location of the trait vector.
+
 
 #----------------
-args = c('r=CVO', 'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=F', 's=b') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c("r=EcholocationUpdate2", "m=data/RemadeTreesAllZoonomiaSpecies.rds", "s=b")
-args = c("m=Data/NoSignExpressionTreesRound3.rds", "r=LiverExpression2", "v=F", "s=b")
-args = c("m=data/RemadeTreesAllZoonomiaSpecies.rds", "r=CategoricalDiet4Phen", "v=T", "s=c")
-args = c("m=data/RemadeTreesAllZoonomiaSpecies.rds", "r=CVHRemake", "s=b")
-args = c("m=data/RemadeTreesAllZoonomiaSpecies.rds", "r=BinaryCVHApplesToApples", "s=b")
-args = c('r=RubyRegenARD',   'm=data/mam120aa_trees.rds', 'v=F', 't=ARD')
-args = c('r=RubyRegenER',   'm=data/mam120aa_trees.rds', 'v=F', 't=ER')
-args = c('r=ThreePhenLikeihoodTest', 'm=data/mam120aa_trees.rds', 'v=F', 's=g')
-args = c('r=HMGRelaxTest', 'm=data/mam120aa_trees.rds', 'v=F', 's=g')
-args = c('r=IPCRelaxTest', 'm=data/mam120aa_trees.rds', 'v=F', 's=g')
 
-args = c('r=NewHiller4Phen', 'm=data/newHillerMainTrees.rds', 'v=F', 's=g')
-args = c('r=NewHiller2Phen', 'm=data/newHillerMainTrees.rds', 'v=T', 's=g')
-args = c('r=NewHillerTestSupraPrimates', 'm=data/newHillerMainTrees.rds', 'v=T', 's=g')
-
-args = c('r=MaturityLifespanPercent', 'm=data/newHillerMainTrees.rds', 's=c','v=F')
-args = c('r=MaturityLogRaw', 'm=data/newHillerMainTrees.rds', 's=c','v=F')
-args = c('r=PankajBodysize', 'm=data/newHillerMainTrees.rds', 's=c','v=F')
-args = c('r=CVHNew', 's=b', 'v=T', 'm=data/RemadeTreesAllZoonomiaSpecies.rds')
-args = c('r=CIvAllZoonomia', 's=b', 'v=T', 'm=data/RemadeTreesAllZoonomiaSpecies.rds')
-
-args = c("r=CVHNew", 'm=data/RemadeTreesAllZoonomiaSpecies.rds', "s=b")
-args = c("r=CategoricalMobivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F")
-args = c("r=RyanPermualtionsDemo", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F")
-
-args = c("r=CategoricalCarnivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F")
-args = c("r=CategoricalInsVertivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F")
-args = c("r=CategoricalInsVertivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalPrunedCarnivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalBinaryInsectivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=50")
-args = c("r=CategoricalBinaryVertivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalBinaryHerbivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=50")
-args = c("r=CategoricalBinaryOmnivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalBinaryCarnivoreTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-
-
-args = c("r=CategoricalNoMegabranchInsvertTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalDownsampledInsvertTree", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-
-args = c('r=meanTemp', 'm=data/zoonomiaAllMammalsTrees.rds', 's=c','v=T', 'n=ZoonomiaTip')
-
-args = c("r=CategoricalSlimMainInsVertivoreTree", 'm=data/CategoricalInsVertivoreMaintrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalInsVertivoreTreeLiamInference", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-args = c("r=CategoricalInsVertivoreTreeCarnivoreLiamInference", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
-
+args = c("r=ComplexDietCentralAnalysis", 'm=zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
 
 
 # --- Standard start-up code ---
@@ -128,7 +85,36 @@ minSpValue = 10
     if(phenotypeStyle == "c" | phenotypeStyle == "C" | phenotypeStyle == "continuous"){phenotypeStyle = "Continuous"}
     if(phenotypeStyle == "g" | phenotypeStyle == "G" | phenotypeStyle == "categorical"){phenotypeStyle = "Categorical"}
   }else{
+    message("No phenotype style specified, attempting to detect automatically.")
+    
+    #Check for categorical 
+    phenotypeTreeFilename = paste(outputFolderName, filePrefix, "Categorical", "Tree.rds", sep="")
+    if(file.exists(phenotypeTreeFilename)){
+      message("Found information for Categorical phenotype, using Categorical phenotype")
+      phenotypeStyle = "Categorical"
+    }else{
+      phenotypeTreeFilename = paste(outputFolderName, filePrefix, "Continuous", "PhenotypeVector.rds", sep="")
+      if(file.exists(phenotypeTreeFilename)){
+        message("Found information for continuous phenotype, using continuous phenotype")
+        phenotypeStyle = "Continuous"
+      }else{
+        phenotypeTreeFilename = paste(outputFolderName, filePrefix, "Binary", "Tree.rds", sep="")
+        if(file.exists(phenotypeTreeFilename)){
+          message("Found information for binary phenotype, using binary phenotype")
+          phenotypeStyle = "binary"
+        }else{
+          message("No phenotyep specified and no correct tree found.")
+          stop()
+        }
+      } 
+    }
+    
+    
+
+    
+    
     message("PhenotypeStyle not specified, using continuous")
+    
   }
   
   #phenotype tree location
@@ -146,7 +132,7 @@ minSpValue = 10
       message("Pre-made Phenotype tree found, using pre-made tree.")
     }else{
       #paste("THIS IS AN ISSUE MESSAGE; SPECIFY PHENOTYPE TREE")
-      stop("THIS IS AN ISSUE MESSAGE; SPECIFY PHENOTYPE TREE")
+      stop("THIS IS AN ISSUE MESSAGE; NO PHENOTYPE TREE/VECTOR FOUND. ENSURE PHENOTYPE TREE/VECTOR FOR SELECTED STYLE AVAILABLE AND PREFIX IS CORRECT.")
     }
   }
   

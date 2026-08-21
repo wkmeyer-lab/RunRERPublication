@@ -1,0 +1,237 @@
+---
+title: "Gene Set Network Graph Tutorial"
+output: html_notebook
+---
+
+## Tutorial: Building a Gene Set Network Graph
+## AI DISCLOSURE: This tutorial was generated with the assistance of Google Gemini 3.1 Pro for cleaning up logic for readability
+
+In this tutorial, we will build a network graph where:
+*   **Nodes (Circles):** Represent biological pathways.
+*   **Node Size:** Represents the total number of genes in that pathway.
+*   **Node Color:** Represents the diet category (Invertivore vs. Vertivore).
+*   **Edges (Lines):** Represent the shared genes between two pathways. Thicker lines mean the pathways share a higher percentage of genes.
+
+### Step 1: Load Required Packages
+First, we install and load the tools we need.
+
+```{r}
+# -------------------------------------------------------------------------
+# 1. LOAD REQUIRED PACKAGES (WITH AUTOMATIC INSTALLATION)
+# -------------------------------------------------------------------------
+# Define the list of packages needed for this tutorial
+required_packages <- c("tidyverse", "igraph", "ggraph", "msigdbr")
+
+# Loop through each package: check if it's installed, install if missing, then load
+for (pkg in required_packages) {
+  if (!require(pkg, character.only = TRUE)) {
+    install.packages(pkg, dependencies = TRUE)
+    library(pkg, character.only = TRUE)
+  }
+}
+```
+
+### Step 2: Load and Clean the Node Data
+Nodes are the entities in our network. Here, we load our dataset, filter it for the pathways we care about, and categorize them based on whether they are significant in at least 50 percent of the alternate trees.
+
+```{r}
+# -------------------------------------------------------------------------
+# 2. LOAD & CLEAN NODE DATA
+# -------------------------------------------------------------------------
+raw_data <- read_csv("ComplexDietCentralAnalysisGeneSets.csv")
+
+# Clean and filter the data to define our network nodes
+node_data <- raw_data %>%
+  rename(pathway = 1) %>% # Rename the first column to 'pathway'
+  
+  # 1. Filter for active pathways (Change 'Fig2' if looking at a different column)
+  filter(Fig2 == 1) %>%
+  
+  # 2. Categorize the diet direction based on the HI_stat score
+  # Positive scores = Invertivore, Negative scores = Vertivore
+  mutate(
+    diet_direction = case_when(
+      HI_stat > 0 ~ "Invertivore", 
+      HI_stat < 0 ~ "Vertivore"
+    ),
+    
+    # Extract the database prefix (e.g., "KEGG", "REACTOME") from the pathway name.
+    # The regex "^[^_]+" means: "Get everything from the start up to the first underscore"
+    category = str_extract(pathway, "^[^_]+")
+  ) %>%
+  # Reorder columns so pathway, diet, and category are listed first
+  select(pathway, diet_direction, category, everything())
+```
+
+### Step 3: Fetch Biological Reference Data
+To know how pathways relate to each other, we need to know exactly which genes are inside them. We will pull this from the Molecular Signatures Database (MSigDB).
+
+```{r}
+# -------------------------------------------------------------------------
+# 3. FETCH GENES FROM MSigDB
+# -------------------------------------------------------------------------
+# Pull the human gene database
+human_msigdb <- msigdbr(species = "Homo sapiens")
+
+# Filter the massive database down to only the pathways present in our node_data
+filtered_ref <- human_msigdb %>%
+  filter(gs_name %in% node_data$pathway) %>%
+  select(pathway = gs_name, gene = gene_symbol)
+
+# Calculate the total number of genes in each pathway to use as our node sizes
+node_sizes <- filtered_ref %>%
+  group_by(pathway) %>%
+  summarise(total_reference_genes = n(), .groups = "drop")
+
+# Attach these sizes back to our main node dataset
+node_data <- node_data %>%
+  left_join(node_sizes, by = "pathway") %>%
+  drop_na(total_reference_genes) # Remove any pathways that weren't found in MSigDB
+```
+
+### Step 4: Calculate the Edges (Gene Overlap)
+Edges connect our nodes. We will connect two pathways if they share a lot of the same genes. To measure this, we use the **Jaccard Similarity Index**, which is: `(Number of Shared Genes) / (Total Unique Genes in Both)`.
+
+```{r}
+# -------------------------------------------------------------------------
+# 4. CALCULATE OVERLAP (EDGES) BETWEEN PATHWAYS
+# -------------------------------------------------------------------------
+# Group the genes into a list for each pathway
+pathway_gene_lists <- filtered_ref %>%
+  group_by(pathway) %>%
+  summarise(genes = list(gene), .groups = "drop")
+
+# Generate all possible pairs of pathways to compare
+num_pathways <- nrow(pathway_gene_lists)
+pairs <- combn(num_pathways, 2) # Creates a 2-row matrix of all unique combinations
+
+# Define our Jaccard math function
+jaccard <- function(a, b) {
+  length(intersect(a, b)) / length(union(a, b))
+}
+
+# Apply the Jaccard function to every pair of pathways
+edge_data <- tibble(
+  from = pathway_gene_lists$pathway[pairs[1, ]],
+  to = pathway_gene_lists$pathway[pairs[2, ]],
+  
+  # map2_dbl runs the Jaccard function across the two lists of genes
+  similarity = map2_dbl(
+    pathway_gene_lists$genes[pairs[1, ]], 
+    pathway_gene_lists$genes[pairs[2, ]], 
+    jaccard
+  )
+)
+
+# Only keep edges where the overlap is greater than 15%. 
+# This prevents our graph from becoming a messy "hairball" of weak connections.
+edge_data_filtered <- edge_data %>% 
+  filter(similarity > 0.15)
+```
+
+### Step 5: Build and Filter the Network Topology
+Sometimes networks have disconnected "islands" (components) of pathways that don't share genes with the main group. We want to clean up the graph by removing small, insignificant islands.
+
+```{r}
+# -------------------------------------------------------------------------
+# 5. BUILD AND FILTER THE NETWORK GRAPH
+# -------------------------------------------------------------------------
+# 1. Build the initial raw network object
+initial_net <- graph_from_data_frame(
+  d = edge_data_filtered, 
+  vertices = node_data, 
+  directed = FALSE # Undirected because sharing genes goes both ways
+)
+
+# 2. Identify the different "islands" (components) in the network
+network_components <- components(initial_net)
+node_data$island_id <- network_components$membership
+
+# 3. Filter for valid islands: Keep the island ONLY if it contains 
+# at least one highly populated pathway (>400 genes)
+filtered_nodes <- node_data %>%
+  group_by(island_id) %>%
+  # Check if ANY node in this island has >400 genes
+  filter(any(total_reference_genes > 400)) %>%
+  ungroup() %>%
+  
+  # Clean up the pathway names for plotting (removes "KEGG_", etc.)
+  mutate(clean_name = str_remove(pathway, "^[^_]+_"))
+
+# 4. Filter the edges so we don't try to draw lines to nodes we just deleted
+filtered_edges <- edge_data_filtered %>%
+  filter(from %in% filtered_nodes$pathway & to %in% filtered_nodes$pathway)
+
+# 5. Rebuild the final, clean network object
+net <- graph_from_data_frame(
+  d = filtered_edges,
+  vertices = filtered_nodes,
+  directed = FALSE
+)
+```
+
+### Step 6: Visualize with ggraph
+Now we map our data to visual aesthetics. We'll use the "nicely" layout, which analyzes your network's size and structure and automatically chooses the best force-directed algorithm (usually "fr" for standard graphs, or a tree layout if it detects a hierarchical structure).Other options are:
+Fruchterman-Reingold ("fr") layout, which simulates a physics environment where nodes repel each other, but edges act as springs holding them together.
+Kamada-Kawai ("kk") layout, calculates distances based on the shortest path (number of steps) between nodes in the network graph, attempting to make the geometric distance match the graph-theoretic distance.
+Circular ("circle") layout, which places all pathways along the perimeter of a single circle, sorting them alphabetically or by data order.
+Grid/Matrix ("grid") layout, which places nodes evenly spaced in a 2D square grid pattern.
+Multidimensional Scaling ("mds") layout, which takes a matrix of the distances between all nodes and projects it into a 2D space.
+
+```{r}
+# -------------------------------------------------------------------------
+# 6. PLOT THE NETWORK
+# -------------------------------------------------------------------------
+p <- ggraph(net, layout = "nicely") + 
+  
+  # Draw the edges (lines)
+  # Opacity (alpha) and thickness (width) are based on Jaccard similarity
+  geom_edge_link(aes(alpha = similarity, width = similarity), 
+                 color = "grey40") + 
+  scale_edge_width(range = c(0.5, 2.5)) +
+  
+  # Draw the nodes (circles)
+  # Size based on gene count, Color based on Diet
+  geom_node_point(aes(size = total_reference_genes, color = diet_direction)) + 
+  
+  # Add the cleaned labels
+  geom_node_text(aes(label = clean_name), 
+                 repel = TRUE,       # repel pushes text apart so it doesn't overlap
+                 size = 2.5, 
+                 fontface = "bold",
+                 max.overlaps = 50) + # limits how many labels are drawn in crowded areas
+  
+  # Customize the colors for our diets
+  scale_color_manual(
+    values = c("Invertivore" = "#0077BB", "Vertivore" = "#EE7733"),
+    name = "Diet"
+  ) +
+  
+  # Set the min and max size of the node circles
+  scale_size_continuous(range = c(5, 16)) + 
+  
+  # Clean up the look of the graph and legends
+  theme_void() +
+  labs(
+    size = "Category Size",
+    edge_width = "Category Overlap"
+  ) +
+  theme(
+    legend.position = "right",
+    plot.title = element_text(face = "bold", size = 16),
+    legend.title = element_text(face = "bold", size = 10)
+  ) +
+  # This section forces the legends to display in a specific, clean order
+  guides(
+    edge_alpha = "none",                   # Hides duplicate edge legend
+    color = guide_legend(order = 1),       # Diet legend on top
+    size = guide_legend(order = 2),        # Node Size legend in middle
+    edge_width = guide_legend(order = 3)   # Gene Overlap legend on bottom
+  )
+
+# Display the plot in your R viewer
+p
+
+# Save the plot to your computer
+ggsave("Figure2AllLegends.png", plot = p, width = 20, height = 20, dpi = 600)
+```

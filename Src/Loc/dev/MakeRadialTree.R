@@ -19,7 +19,11 @@ args =c("r=CategoricalInsVertivoreTree", 'p=c("darkgreen", "darkblue", "black", 
 args =c("r=makeLalithaTree", 'p=c("darkgreen", "darkblue", "black")', 'c=c("1", "2", "3")', 'n=ZoonomiaTip', "l=Phen", "i= T")
 
 args =c("r=CategoricalInsVertivoreTreeLiamInference", 'p=c("darkgreen", "darkblue", "black", "red")', 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
+args =c("r=ComplexDietCentralAnalysis", 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
 
+args =c("r=ComplexDietCentralAnalysis", 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
+args =c("r=LeahCategoricalRERNew", 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=Species', "l=Diet", "i=T", "d=Data/LeahFakeMainTrees.rds")
+args =c("r=PosterTreeNew", 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=SciencificName', "l=Diet", "i=T", "m=Data/LeahFakeMainTrees.rds", "d=Data/LeahPosterData.csv")
 
 
 # -- Standard Startup code -- 
@@ -54,7 +58,7 @@ args =c("r=CategoricalInsVertivoreTreeLiamInference", 'p=c("darkgreen", "darkblu
 # -- Argument imports --- 
 {
   mainTreesLocation = "Data/zoonomiaAllMammalsTrees.rds"
-  palette(c( "darkgreen", "darkblue", "black", "red"))
+  palette(c( "#1b9e77", "#7570b3", "#000000", "#e7298a"))
   spreadSheetLocation = "Data/mergedData.csv"
   nameColumn = "tipName"
   CategoryReplacements = NULL
@@ -73,7 +77,7 @@ args =c("r=CategoricalInsVertivoreTreeLiamInference", 'p=c("darkgreen", "darkblu
     paletteValues = cmdArgImport('p')
     palette(paletteValues)
   }else{
-    message("No Palette Provided, using: darkgreen, darkblue, black, red")
+    message("No Palette Provided, using: sharpgreen, baleblue, black, pink")
   }
   
   #spreadsheet File
@@ -187,11 +191,9 @@ if(!file.exists(uuidListFilename) | forceUpdate){                             #i
 }
 
 
-# Replace any missing UUIDs with tardigrades as debug images 
 
-#uuidList[21] = get_uuid("tardigrades")
 
-#uuidList[uuidList == "NULL"] = NULL
+
 
 tip_data = data.frame(
   scientificlabel = scientificCategoricalTree$tip.label,
@@ -199,7 +201,11 @@ tip_data = data.frame(
   node = 1:length(scientificCategoricalTree$tip.label),
   stringsAsFactors = FALSE
 )
-#tip_data$uuid[tip_data$uuid == "NULL"] = NULL
+
+tardigradeUUID = get_uuid("tardigrades")
+
+# Replace any missing UUIDs with tardigrades as debug images 
+tip_data$uuid[tip_data$uuid == "NULL"] = tardigradeUUID
 
 
 ggTreeOut = ggtree(commonCategoricalTree, layout = "circular") +scale_color_manual(values=palette()) 
@@ -209,6 +215,7 @@ ggTreeOut = ggTreeOut %<+% tip_data
 #ggTreeOut = ggTreeOut + geom_tiplab()
 #ggTreeOut = ggTreeOut + geom_tiplab(geom = "phylopic", aes(image = uuid))
 #ggTreeOut + geom_phylopic(aes(uuid = uuid), color = "black", alpha = 1, size = 0.08)
+ggTreeOut = ggTreeOut + geom_treescale(x = 0.45, y = 0, width = 0.1, fontsize = 4)
 ggTreeOut
 
 #make the ggtree object temporarily for refrencing in later code
@@ -219,6 +226,7 @@ if(imageAllTips){
   
   
   missingPhylopics = which(uuidList == "NULL")
+  #missingPhylopics = append(missingPhylopics, which(is.na(uuidList)))
   for(i in 1:length(missingPhylopics)){
     
     message( "------- WARNING -------")
@@ -227,7 +235,7 @@ if(imageAllTips){
     cat( "This image has been replaced with a tardigrade to stop the code from breaking. \n Either find an appropriate phylopic and manually replace it, \n or remove the tardigrade manually from the final output. \n")
     cat( "Your total number of tardigrades is:", length(missingPhylopics))
   }
-  
+
   
   clades = data.frame(
     node = 1:length(commonCategoricalTree$tip.label),
@@ -286,48 +294,49 @@ if(imageAllTips){
   {
     collapsedClades = data.frame()
     collapsedClades[1,] = NA
-    
-    collapsedClades$Platypus = MRCA(commonCategoricalTree, 195)
-    collapsedClades$Opossums = MRCA(commonCategoricalTree, c(194,192,193))
-    collapsedClades$Koala = MRCA(commonCategoricalTree, c(190,191))
-    collapsedClades$Kangaroos = MRCA(commonCategoricalTree, c(186,187,189,188))
-    collapsedClades$Anteaters = MRCA(commonCategoricalTree, c(183,182))
-    collapsedClades$Sloths = MRCA(commonCategoricalTree, c(181,180))
-    collapsedClades$Elephant= MRCA(commonCategoricalTree, c(178,177,176))
-    collapsedClades$Aardvark = MRCA(commonCategoricalTree, c(175,174,171,172,173))
-    collapsedClades$Strepsirrhini = MRCA(commonCategoricalTree, c(28,29,27,26,24,25,23,21,22,20,19))
+    collapsedClades$Platypus = MRCA(commonCategoricalTree, 192)
+    collapsedClades$Opossums = MRCA(commonCategoricalTree, c(190,191,189))
+    collapsedClades$Koala = MRCA(commonCategoricalTree, c(187,188))
+    collapsedClades$Kangaroos = MRCA(commonCategoricalTree, c(186,185,184,183))
+    collapsedClades$Anteaters = MRCA(commonCategoricalTree, c(180,179))
+    collapsedClades$Sloths = MRCA(commonCategoricalTree, c(178,177))
+    collapsedClades$Elephant= MRCA(commonCategoricalTree, c(174,173,175))
+    collapsedClades$Aardvark = MRCA(commonCategoricalTree, c(172,171,168,169,170))
+    collapsedClades$Strepsirrhini = MRCA(commonCategoricalTree, c(27,28,26,25,23,24,22,19,20,21))
     collapsedClades$Atelidae = MRCA(commonCategoricalTree, c(6,5,4,3,2,1))
-    collapsedClades$Chimpanze = MRCA(commonCategoricalTree, c(18,17,16,15,14,12,13,10,9,8,7,11))
-    collapsedClades$Hares = MRCA(commonCategoricalTree, c(71,70))
-    collapsedClades$Squirrels = MRCA(commonCategoricalTree, c(69,67,68,61,66,65,63,62,64))
-    collapsedClades$Capybara = MRCA(commonCategoricalTree, c(33,32,31,30))
-    collapsedClades$Beaver = MRCA(commonCategoricalTree, c(36,35,34))
-    collapsedClades$Jerboa = MRCA(commonCategoricalTree, c(59,58,57))
-    collapsedClades$Deomyinae = MRCA(commonCategoricalTree, c(41,39,40,38,37,44,43,42))
-    collapsedClades$Vole = MRCA(commonCategoricalTree, c(48,47,46,45))
-    collapsedClades$Neotominae = MRCA(commonCategoricalTree, c(54,49,50,52,51,53))
-    collapsedClades$`African Hedgehogs` = MRCA(commonCategoricalTree, c(168,169))
-    collapsedClades$`Talpa europaea` = MRCA(commonCategoricalTree, c(167,165,164,166))
-    collapsedClades$`Flying Fox` = MRCA(commonCategoricalTree, c(163,161,162))
-    collapsedClades$Rhinolophidae = MRCA(commonCategoricalTree, c(155,156,158,157,159,160))
-    collapsedClades$`Big Brown Bat` = MRCA(commonCategoricalTree, c(143,142,139,140,141))
-    collapsedClades$Phyllostomidae = MRCA(commonCategoricalTree, c(144,145,147,146))
-    collapsedClades$Noctilio = MRCA(commonCategoricalTree, c(154))
-    collapsedClades$Horse = MRCA(commonCategoricalTree, c(100,99,98))
-    collapsedClades$Pig = MRCA(commonCategoricalTree, c(95,96))
-    collapsedClades$`bos bison` = MRCA(commonCategoricalTree, c(87,89,88))
-    collapsedClades$`Humpback Whale` = MRCA(commonCategoricalTree, c(75,74,72,73))
-    collapsedClades$`Dolphins` = MRCA(commonCategoricalTree, c(82,81,80,77,76))
-    collapsedClades$`Pangolin` = MRCA(commonCategoricalTree, c(138,137))
-    collapsedClades$`Lion` = MRCA(commonCategoricalTree, c(131,130,129))
-    collapsedClades$`Meerkat` = MRCA(commonCategoricalTree, c(135,134))
-    collapsedClades$`Dog` = MRCA(commonCategoricalTree, c(101,102))
-    collapsedClades$`Brown Bear` = MRCA(commonCategoricalTree, c(125,128,127))
-    collapsedClades$`Odobenus rosmarus` = MRCA(commonCategoricalTree, c(120,119,118,117))
-    collapsedClades$`Phocidae` = MRCA(commonCategoricalTree, c(124,123,121,122))
-    collapsedClades$`Procyon lotor` = MRCA(commonCategoricalTree, c(114,113,112))
-    collapsedClades$`Lontra provocax` = MRCA(commonCategoricalTree, c(108,107,106,105,104))
-    collapsedClades$`Tasmanian Devil` = MRCA(commonCategoricalTree, c(184,185))
+    collapsedClades$Chimpanze = MRCA(commonCategoricalTree, c(18, 16, 17, 15,14, 12, 13, 11, 7, 8, 9, 10))
+    collapsedClades$Hares = MRCA(commonCategoricalTree, c(72,73))
+    collapsedClades$Squirrels = MRCA(commonCategoricalTree, c(71,69,70,63,68,67,66,64,65))
+    collapsedClades$Capybara = MRCA(commonCategoricalTree, c(32,31,29,30))
+    collapsedClades$Beaver = MRCA(commonCategoricalTree, c(35,33,34))
+    collapsedClades$Jerboa = MRCA(commonCategoricalTree, c(61,59,60))
+    collapsedClades$Vole = MRCA(commonCategoricalTree, c(48,47,49,50))
+    collapsedClades$Neotominae = MRCA(commonCategoricalTree, c(56,51,52,55,53,54))
+    collapsedClades$Deomyinae = MRCA(commonCategoricalTree, c(36,37,40,38,39))
+    collapsedClades$Rattus = MRCA(commonCategoricalTree, c(46,45,41,44,42,43))
+    collapsedClades$`African Hedgehogs` = MRCA(commonCategoricalTree, c(165,166))
+    collapsedClades$`Talpa europaea` = MRCA(commonCategoricalTree, c(164,163,161,162))
+    collapsedClades$`Flying Fox` = MRCA(commonCategoricalTree, c(160,158,159))
+    collapsedClades$`Horseshoe Bats` = MRCA(commonCategoricalTree, c(152,153,154,155,156,157))
+    collapsedClades$`Big Brown Bat` = MRCA(commonCategoricalTree, c(140,139,136,137,138))
+    collapsedClades$Noctilio = MRCA(commonCategoricalTree, c(151))
+    collapsedClades$`Vampire Bat` = MRCA(commonCategoricalTree, c(147))
+    collapsedClades$Phyllostomidae = MRCA(commonCategoricalTree, c(141,142,143,144))
+    collapsedClades$Horse = MRCA(commonCategoricalTree, c(102,100,101))
+    collapsedClades$Pig = MRCA(commonCategoricalTree, c(97,98))
+    collapsedClades$`bos bison` = MRCA(commonCategoricalTree, c(89,90,91))
+    collapsedClades$`Humpback Whale` = MRCA(commonCategoricalTree, c(77,76,74,75))
+    collapsedClades$`Dolphins` = MRCA(commonCategoricalTree, c(83,84,82,78,79, 80, 81))
+    collapsedClades$`Pangolin` = MRCA(commonCategoricalTree, c(134,135))
+    collapsedClades$`Lion` = MRCA(commonCategoricalTree, c(128))
+    collapsedClades$`Meerkat` = MRCA(commonCategoricalTree, c(131,132))
+    collapsedClades$`Dog` = MRCA(commonCategoricalTree, c(103,104))
+    collapsedClades$`Brown Bear` = MRCA(commonCategoricalTree, c(124,126,125,127))
+    collapsedClades$`Odobenus rosmarus` = MRCA(commonCategoricalTree, c(119,118,116,117))
+    collapsedClades$`Phocidae` = MRCA(commonCategoricalTree, c(120,121,122,123))
+    collapsedClades$`Procyon lotor` = MRCA(commonCategoricalTree, c(113,111,112))
+    collapsedClades$`Lontra provocax` = MRCA(commonCategoricalTree, c(107,106,105))
+    collapsedClades$`Tasmanian Devil` = MRCA(commonCategoricalTree, c(181,182))
   }
   
   
@@ -400,7 +409,10 @@ ggTreeClades = ggTreeClades %<+% edge + aes(color=CategorylengthChar) +labs(colo
 ggTreeClades = ggTreeClades %<+% tip_data 
 ggTreeClades$data$label = paste(ggTreeClades$data$label, "-", ggTreeClades$data$node, sep="")
 
+
 ggTreeClades= ggTreeClades %<+% clades
+ggTreeClades = ggTreeClades+ geom_treescale(x = 0.45, y = 0, width = 0.1, fontsize = 4)
+
 
 if(!imageAllTips){
   for(i in 1:ncol(collapsedClades)){
@@ -412,17 +424,18 @@ if(!imageAllTips){
 
 #output the tree
 treeOutputLocation = paste0(outputFolderName, filePrefix, "RadialDisplayTree.pdf")
-pdf(treeOutputLocation)
+pdf(treeOutputLocation, width = 18, height = 20)
 #ggTreeClades + rphylopic::geom_phylopic(data = ggTreeClades$data, aes(uuid = phylopic, x = x_new, y= y_new),size = 0.02)
 ggTreeClades + ggimage:: geom_phylopic(data = ggTreeClades$data, aes(image = phylopic, x = x_new, y= y_new),size = 0.02)
+ggTreeClades + geom_tiplab()+ theme(legend.position = "none")
 dev.off()
 
 treeOutputLocation = paste0(outputFolderName, filePrefix, "RadialDisplayTree.png")
-png(treeOutputLocation, 3000, 3000)
+png(treeOutputLocation, 1400, 1400)
 #ggTreeClades + rphylopic::geom_phylopic(data = ggTreeClades$data, aes(uuid = phylopic, x = x_new, y= y_new),size = 0.02)
 ggTreeClades + ggimage:: geom_phylopic(data = ggTreeClades$data, aes(image = phylopic, x = x_new, y= y_new),size = 0.02)
+ggTreeClades + geom_tiplab()
 dev.off()
-
 
 
 
@@ -430,4 +443,47 @@ dev.off()
 # Make code for using the clade style tip labels on individual tips 
 
 
-
+# Original analysis manual clades: 
+{  # for original analysis  
+  collapsedClades$Platypus = MRCA(commonCategoricalTree, 195)
+  collapsedClades$Opossums = MRCA(commonCategoricalTree, c(194,192,193))
+  collapsedClades$Koala = MRCA(commonCategoricalTree, c(190,191))
+  collapsedClades$Kangaroos = MRCA(commonCategoricalTree, c(186,187,189,188))
+  collapsedClades$Anteaters = MRCA(commonCategoricalTree, c(183,182))
+  collapsedClades$Sloths = MRCA(commonCategoricalTree, c(181,180))
+  collapsedClades$Elephant= MRCA(commonCategoricalTree, c(178,177,176))
+  collapsedClades$Aardvark = MRCA(commonCategoricalTree, c(175,174,171,172,173))
+  collapsedClades$Strepsirrhini = MRCA(commonCategoricalTree, c(28,29,27,26,24,25,23,21,22,20,19))
+  collapsedClades$Atelidae = MRCA(commonCategoricalTree, c(6,5,4,3,2,1))
+  collapsedClades$Chimpanze = MRCA(commonCategoricalTree, c(18,17,16,15,14,12,13,10,9,8,7,11))
+  collapsedClades$Hares = MRCA(commonCategoricalTree, c(71,70))
+  collapsedClades$Squirrels = MRCA(commonCategoricalTree, c(69,67,68,61,66,65,63,62,64))
+  collapsedClades$Capybara = MRCA(commonCategoricalTree, c(33,32,31,30))
+  collapsedClades$Beaver = MRCA(commonCategoricalTree, c(36,35,34))
+  collapsedClades$Jerboa = MRCA(commonCategoricalTree, c(59,58,57))
+  collapsedClades$Deomyinae = MRCA(commonCategoricalTree, c(41,39,40,38,37,44,43,42))
+  collapsedClades$Vole = MRCA(commonCategoricalTree, c(48,47,46,45))
+  collapsedClades$Neotominae = MRCA(commonCategoricalTree, c(54,49,50,52,51,53))
+  collapsedClades$`African Hedgehogs` = MRCA(commonCategoricalTree, c(168,169))
+  collapsedClades$`Talpa europaea` = MRCA(commonCategoricalTree, c(167,165,164,166))
+  collapsedClades$`Flying Fox` = MRCA(commonCategoricalTree, c(163,161,162))
+  collapsedClades$Rhinolophidae = MRCA(commonCategoricalTree, c(155,156,158,157,159,160))
+  collapsedClades$`Big Brown Bat` = MRCA(commonCategoricalTree, c(143,142,139,140,141))
+  collapsedClades$Phyllostomidae = MRCA(commonCategoricalTree, c(144,145,147,146))
+  collapsedClades$Noctilio = MRCA(commonCategoricalTree, c(154))
+  collapsedClades$Horse = MRCA(commonCategoricalTree, c(100,99,98))
+  collapsedClades$Pig = MRCA(commonCategoricalTree, c(95,96))
+  collapsedClades$`bos bison` = MRCA(commonCategoricalTree, c(87,89,88))
+  collapsedClades$`Humpback Whale` = MRCA(commonCategoricalTree, c(75,74,72,73))
+  collapsedClades$`Dolphins` = MRCA(commonCategoricalTree, c(82,81,80,77,76))
+  collapsedClades$`Pangolin` = MRCA(commonCategoricalTree, c(138,137))
+  collapsedClades$`Lion` = MRCA(commonCategoricalTree, c(131,130,129))
+  collapsedClades$`Meerkat` = MRCA(commonCategoricalTree, c(135,134))
+  collapsedClades$`Dog` = MRCA(commonCategoricalTree, c(101,102))
+  collapsedClades$`Brown Bear` = MRCA(commonCategoricalTree, c(125,128,127))
+  collapsedClades$`Odobenus rosmarus` = MRCA(commonCategoricalTree, c(120,119,118,117))
+  collapsedClades$`Phocidae` = MRCA(commonCategoricalTree, c(124,123,121,122))
+  collapsedClades$`Procyon lotor` = MRCA(commonCategoricalTree, c(114,113,112))
+  collapsedClades$`Lontra provocax` = MRCA(commonCategoricalTree, c(108,107,106,105,104))
+  collapsedClades$`Tasmanian Devil` = MRCA(commonCategoricalTree, c(184,185))
+}

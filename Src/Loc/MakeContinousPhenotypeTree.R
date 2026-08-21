@@ -6,7 +6,6 @@ library(RERconverge)
 library(tools)
 source("Src/Reu/cmdArgImport.R")
 source("Src/Reu/ZoonomTreeNameToCommon.R")
-source("Src/Reu/ZonomNameConvertVector.R")
 # -- Usage:
 # This script creates a categorical tree of a phenotype which has been annotated in the Manual Annotations spreadsheet of the meyer lab. 
 # In theory, this script could be used on any spreadsheet, so long as the column containing the tip.labels is named "FaName", and the column with common names is named "Common.Name.Or.Group". 
@@ -27,11 +26,6 @@ source("Src/Reu/ZonomNameConvertVector.R")
 
 
 #----------------
-args = c('r=MaturityLifespanPercent', 'm=data/newHillerMainTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=MaturityPercentage','v=T')
-args = c('r=MaturityLogRaw', 'm=data/newHillerMainTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=logCombinedMaturity','v=T', 'n=FaName')
-args = c('r=PankajBodysize', 'm=data/newHillerMainTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=combinedBodysize','v=T', 'n=FaName')
-
-args = c('r=meanTemp', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=panTheriaTemperature','v=T', 'n=ZoonomiaTip')
 
 
 # --- Standard start-up code ---
@@ -252,6 +246,12 @@ speciesNames = relevantSpecies[[nameColumn]]                                    
 phenotypeVector = speciesValues                                                 #combine those into⌄
 phenotypeVector = as.numeric(phenotypeVector)
 names(phenotypeVector) = speciesNames                                           #the format the functions expect
+
+#remove species with an NA phenotype
+speciesMissingPhenotypeData = which(is.na(phenotypeVector))
+if(length(speciesMissingPhenotypeData) >0){
+  phenotypeVector = phenotypeVector[-speciesMissingPhenotypeData]
+}
 
 
 phenotypeVectorFilename = paste(outputFolderName, filePrefix, "ContinuousPhenotypeVector.rds",sep="") #make a filename based on the prefix

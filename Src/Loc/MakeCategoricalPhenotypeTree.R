@@ -16,668 +16,25 @@ source("Src/Reu/ZoonomTreeNameToCommon.R")
 # m = mainTreeFilename.txt or .rds                       This sets the location of the maintrees file
 # d = spreadSheetFilename.csv                            This sets the spreadsheet to read the data from 
 # a = "annotCollumn"                                     This is the column in the manual annotations spreadsheet to use
+# n = "nameColumn"                                       This sets the column with the tip names as they appear in the maintrees file. 
 # c = <c("nameOfCategory1,"nameOfCategory2")>            This is the list of category names 
 # u = list(c("replace1", "with1"),c("replace2, with2"))
 # o = list(c("phenotype1", "intophen1"), c("2", "i2"))   This causes combination phenotypes to be merged into the second phenotype, but does not replace standalone phenotypes
 # s = "screenCollumn"                                    This is a collumn which must have a value of 1 for the species to be included. 
 # t = <ER or SYM or ARD>                                 This sets the model type used to estimate ancestral branches 
 # g = "ancestralTrait"                                   This can be used to set all non-terminal branches to this category. Use be one of the categories in the list. 
-# n = "nameColumn"                                       This sets the column with the tip names as they appear in the maintrees file. 
 # z = <minimum branch length>                            This sets the minimum branch length for terminal branches in the master tree. Branches shorter than this will be removed. 
 # x = "pruningPrefrenceColumn"                           This sets a column, where if the value is 1, the tip will be preferentially kept. If the value is TRUE, the tip will never be pruned.
 # y = "c('unprunedtip1', 'unprunedtip2')"                This allows you to add a list of specific tips to not be dropped during pruning. Must use the tip name, not common name. 
 # p = "c('prunedtip1', 'prunedtip2')"                    This allows you to manually specify additional branches to be pruned
-
+# l = <T or F>                                           DO NOT USE UNLESS SPECIFIED -- This determines if the liam infrence nodes should be added 
+# e = <T or F>                                           This sets if alternate species sets should be created. 
 #----------------
 {
-args = c('r=CategoricalInsectRoot4Phen', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore")', 'u=list(c("Generalist","_Omnivore"),c("Omnivore","_Omnivore"), c("Piscivore", "Carnivore"))',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=ER', "n=Insectivore")
-args = c('r=BinaryCVHApplesToApples', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Herbivore")', 'u=list(c("Carnivore","_Carnivore"), c("Piscivore", "_Carnivore"))',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=ER')
-args = c('r=CategoricalER5Phen', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore")', 'u=list(c("Generalist","_Omnivore"),c("Omnivore","_Omnivore"))',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=ER')
-args = c('r=CategoricalARD5Phen', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore")', 'u=list(c("Generalist","_Omnivore"),c("Omnivore","_Omnivore"))',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=ARD')
-args = c('r=CategoricalARD3Phen', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore")', 'u=list(c("Generalist","_Omnivore"),c("Omnivore","_Omnivore")), c("Piscivore", "Carnivore")',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=ARD')
-args = c('r=RubyRegenARD',   'm=data/mam120aa_trees.rds', 'v=F', 't=ARD')
-args = c('r=RubyRegenER',   'm=data/mam120aa_trees.rds', 'v=F', 't=ER', 'a=Meyer.Lab.Classification')
-args = c('r=Categorical3PhenARDTest', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Herbivore", "Omnivore")', 'u=list(c("Omnivore","_Omnivore"), c("Piscivore", "Carnivore"))',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=rm')
-args = c('r=Categorical5PhenDemo', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore")', 'u=list(c("Generalist","_Omnivore"),c("Omnivore","_Omnivore"))',   'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=T', 't=ER')
 
-
-
-args = c('r=OnetwentyWay6Phen', 'm=data/mam120aa_trees.rds', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist")', 'u=list(c("Generalist","Anthropivore"), c("Generalist", "Omnivore"))', 'o=list(c("Carnivore", "Piscivore"))', 'v=F', 't=SYM')
-args = c('r=ThreePhenLikeihoodTest', 'm=data/mam120aa_trees.rds', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Piscivore", "Generalist", "Insectivore")', 'u=list(c("Anthropivore","_Omninivore"), c("Omnivore", "_Omninivore"), c("Piscivore", "Carnivore"), c("Insectivore", "Carnivore"))', 'o=list(c("Carnivore", "Piscivore"))', 'v=F', 't=ARD')
-args = c('r=HMGRelaxTest', 'm=data/mam120aa_trees.rds', 'a=DEBUG_using_preexisting_phenotypeVector', 'v=F', 't=ER')
-args = c('r=HMGUnRelaxTest', 'm=data/mam120aa_trees.rds', 'a=DEBUG_using_preexisting_phenotypeVector', 'v=F', 't=ER')
-args = c('r=IPCRelaxTest', 'm=data/mam120aa_trees.rds', 'a=DEBUG_using_preexisting_phenotypeVector', 'v=F', 't=ER')
-args = c('r=IPCUnRelaxTest', 'm=data/mam120aa_trees.rds', 'a=DEBUG_using_preexisting_phenotypeVector', 'v=F', 't=ER')
-
-
-args = c('r=NewHiller4Phen', 'm=data/newHillerMainTrees.rds', 'd=Data/HillerZoonomiaPhenotypeTable.csv', 'a=phenotype', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist")', 'u=list(c("Generalist","Omnivore"), c("Omnivore", "_Omnivore"), c("Piscivore", "Carnivore"))', 'v=F', 't=ER')
-args = c('r=NewHiller2Phen', 'm=data/newHillerMainTrees.rds', 'd=Data/HillerZoonomiaPhenotypeTable.csv', 'a=phenotype', 'c=c("Carnivore", "Herbivore", "Piscivore")', 'u=list(c("Piscivore", "Carnivore"))', 'v=F', 't=ER')
-args = c('r=PruningTest', 'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'd=Data/mergedData.csv', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist")', 'u=list(c("Generalist", "Omnivore"), )', 'o=list(c("Carnivore", "Piscivore"))','v=T', 't=ER', 'n=Zoonomia', "z=0.01", "x=HillerZoonomiaOverlap")
-
-
-args = c('r=NewHiller4Phen', 'm=data/newHillerMainTrees.rds', 'd=Data/HillerZoonomiaPhenotypeTable.csv', 'a=phenotypeSimplified', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist")', 'u=list(c("Generalist","Omnivore"), c("Omnivore", "_Omnivore"), c("Piscivore", "Carnivore"))', 'o=list(c("Carnivore", "Insectivore"))','v=T', 't=ER')
-args = c('r=NewHiller2Phen', 'm=data/newHillerMainTrees.rds', 'd=Data/HillerZoonomiaPhenotypeTable.csv', 'a=phenotypeSimplified', 'c=c("Carnivore", "Herbivore", "Piscivore")', 'u=list(c("Herbivore", "_Herbivore"), c("Piscivore", "Carnivore"))','v=T', 't=ER')
-args = c('r=NewHillerTestSupraPrimates', 'm=data/newHillerMainTrees.rds', 'd=Data/HillerZoonomiaPhenotypeTable.csv', 'a=Supraprimates', 'c=c("1", "0")', 'u=list(c("Herbivore", "_Herbivore"), c("Piscivore", "Carnivore"))','v=T', 't=ER')
-
-args = c('r=CIvHBinaryHiller', 'm=data/newHillerMainTrees.rds', 'd=Data/mergedData.csv', 'a=Meyer.Diet.Categorical', 'c=c("Carnivore", "Herbivore", "Insectivore", "Piscivore")', 'u=list(c("Herbivore", "_Herbivore"), c("Piscivore", "Carnivore"), c("Insectivore", "Carnivore"))','v=T', 't=ER', 'n=HillerName', 's=NoAoudad')
-args = c('r=CIvHBinaryZoonomia', 'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'd=Data/mergedData.csv', 'a=Meyer.Lab.Classification', 'c=c("Carnivore", "Herbivore", "Insectivore", "Piscivore")', 'u=list(c("Herbivore", "_Herbivore"), c("Piscivore", "Carnivore"), c("Insectivore", "Carnivore"))','v=T', 't=ER', 'n=Zoonomia', 's=NoAoudad')
-
-
-args = c('r=ZoonomiaCategoricalRefrenceTree', 'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'd=Data/mergedData.csv', 'a=Meyer.Lab.Classification.Clean', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist", "Planktivore")', 'u=list(c("Generalist", "Omnivore"), c("Omnivore-IH", "Omnivore"), c("Omnivore", "_Omnivore"))', 'o=list(c("Piscivore", "Carnivore"), c("Planktivore", "Carnivore"), c("Insectivore", "Carnivore"), c("Piscivore", "Insectivore"))','v=T', 't=ER', 'n=Zoonomia')
-args = c('r=HillerCategoricalRefrenceTree', 'm=data/NewHillerMainTrees.rds', 'd=Data/mergedData.csv', 'a=Meyer.Lab.Classification.Clean', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist", "Planktivore")', 'u=list(c("Generalist", "Omnivore"), c("Omnivore-IH", "Omnivore"), c("Omnivore", "_Omnivore"))', 'o=list(c("Piscivore", "Carnivore"), c("Planktivore", "Carnivore"), c("Insectivore", "Carnivore"), c("Piscivore", "Insectivore"))','v=T', 't=ER', 'n=HillerName', 's=NoAoudad')
-
-args = c('r=TrueCategoricalRefrenceTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=Meyer.Lab.Classification.Clean', 'c=c("Carnivore", "Omnivore", "Herbivore", "Insectivore", "Piscivore", "Generalist", "Planktivore")', 'u=list(c("Generalist", "Omnivore"), c("Omnivore-IH", "Omnivore"), c("Omnivore", "_Omnivore"))', 'o=list(c("Piscivore", "Carnivore"), c("Planktivore", "Carnivore"), c("Insectivore", "Carnivore"), c("Piscivore", "Insectivore"))','v=T', 't=ER', 'n=Zoonomia')
-args = c('r=makeLalithaTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=AlliePheno', 'c=c("1", "2", "3")' ,'v=T', 't=ER', 'n=ZoonomiaTip')
-
-}
-{
-args = c('r=TrueCategoricalRefrenceTreeComplex', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90', 
-          'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-          'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), 
-            c("C-Herpetivore", "Herpetivore"),
-            c("C-Piscivore", "Piscivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), 
-            c("C-All-Animals-Eater", "InsVertivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Frugivore"), 
-            c("H-Nectarivore", "Nectarivore"), 
-            c("H-High-sugar-plants-Eater", "Glucivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Generalist")
-          )', 
-          'v=T', 't=ER', 'n=ZoonomiaTip')
-
-args = c('r=TrueCategoricalRefrenceTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), 
-            c("C-Herpetivore", "Herpetivore"),
-            c("C-Piscivore", "Piscivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), 
-            c("C-All-Animals-Eater", "InsVertivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Frugivore"), 
-            c("H-Nectarivore", "Nectarivore"), 
-            c("H-High-sugar-plants-Eater", "Glucivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip')
-
-args = c('r=TrueCategoricalRefrenceTreeCompressed', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), 
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), 
-            c("C-All-Animals-Eater", "InsVertivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip')
-
-args = c('r=CategoricalWorkingTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), 
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), 
-            c("C-All-Animals-Eater", "InsVertivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip')
-
-args = c('r=CategoricalMobivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip')
-args = c('r=RyanPermulationsDemo', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip')
-
-args = c('r=CategoricalCarnivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Carnivore"), c("C-InsVertivore-Insectivore", "Carnivore"),
-            c("C-Herpetivore", "Carnivore"),
-            c("C-Piscivore", "Carnivore"), c("C-InsVertivore-Piscivore", "Carnivore"),
-            c("C-Endotherm-Carnivore", "Carnivore"), c("C-Scavenger", "Carnivore"), c("C-Nonspecific-Vertebrate-eater", "Carnivore"),
-            c("C-Terrestrial-vertebrates-eater", "Carnivore"), c("C-All-vertebrate-eater", "Carnivore"), c("C-InsVertivore-Carnivore", "Carnivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip')
-}
-args = c('r=CategoricalInsVertivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )')
-{
-args = c('r=CategoricalPrunedCarnivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c("C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Carnivore"), c("C-InsVertivore-Insectivore", "Carnivore"),
-            c("C-Herpetivore", "Carnivore"),
-            c("C-Piscivore", "Carnivore"), c("C-InsVertivore-Piscivore", "Carnivore"),
-            c("C-Endotherm-Carnivore", "Carnivore"), c("C-Scavenger", "Carnivore"), c("C-Nonspecific-Vertebrate-eater", "Carnivore"),
-            c("C-Terrestrial-vertebrates-eater", "Carnivore"), c("C-All-vertebrate-eater", "Carnivore"), c("C-InsVertivore-Carnivore", "Carnivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01', 
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-}
-{
-args = c('r=CategoricalBinaryInsectivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore"),
-            c("Omnivore", "Background"), c("Vertivore", "Background"), c("Herbivore", "Background")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-  args = c('r=CategoricalBinaryVertivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-           'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-           'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore"),
-            c("Omnivore", "Background"), c("Insectivore", "Background"), c("Herbivore", "Background")
-          )', 
-          'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-          'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-  args = c('r=CategoricalBinaryHerbivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-           'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-           'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore"),
-            c("Omnivore", "Background"), c("Insectivore", "Background"), c("Vertivore", "Background")
-          )', 
-          'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-          'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-  args = c('r=CategoricalBinaryOmnivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-           'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-           'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore"),
-            c("Herbivore", "Background"), c("Insectivore", "Background"), c("Vertivore", "Background")
-          )', 
-          'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-          'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-  args = c('r=CategoricalBinaryCarnivoreTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-           'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist", "Carnivore"
-            )', 
-           'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Mixed"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore"),
-            c("Vertivore", "Carnivore"), c("Insectivore", "Carnivore"), c("Mixed", "Carnivore"), c("Omnivore", "Background"), c("Herbivore", "Background")
-          )', 
-          'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-          'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
   
-}
-{
-args = c('r=CategoricalNoMegabranchInsvertTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c(
+  args = c('r=ComplexDietCentralAnalysis', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01', 'l=T', 'e=T',
+           'c=c(
               "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
               "O-For Examination", "O-Scavenger", 
               "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
@@ -687,7 +44,7 @@ args = c('r=CategoricalNoMegabranchInsvertTree', 'm=data/zoonomiaAllMammalsTrees
               "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
               "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
             )', 
-         'u=list(
+           'u=list(
             c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
             c("C-Herpetivore", "Vertivore"),
             c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
@@ -702,385 +59,30 @@ args = c('r=CategoricalNoMegabranchInsvertTree', 'm=data/zoonomiaAllMammalsTrees
             c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
             c("O-Generalist", "Omnivore")
           )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-
-args = c('r=CategoricalNoMegabranchInsvertTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-args = c('r=CategoricalDownsampledInsvertTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-}
-{
-args = c('r=Categorical4CategoryUnprunedTree', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip',
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )')
-
-args = c('r=CategoricalInsVertivoreTreeHeavyPrune', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.05',
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 'y=c("vs_HLpanLeo1")')
-
-args = c('r=CategoricalSlimMainInsVertivoreTree', 'm=data/CategoricalInsVertivoreMaintrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1", "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", 
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", 
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "vs_HLursThi1", 
-          "vs_ursMar1", "vs_HLursArc1", "vs_lepWed1", "vs_HLailMel2", 
-          "vs_HLmirAng2", "vs_HLphoVit1", "HarborSealGreySealClade", "vs_HLeriBar1", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", 
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", 
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", 
-          "vs_HLlycPic2", "vs_HLgloMel1", "vs_HLpepEle1", 
-          "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast",
-          "vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", 
-          "vs_HLmerUng1", "vs_HLeulMon1", "vs_HLeulFul1", 
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", 
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", 
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", 
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", 
-          "vs_HLtraJav1", "vs_mm10", "vs_HLmarFla1", "marmotClade"
-         )')
-}
-args = c('r=CategoricalInsVertivoreTreePruningTest', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1",  "PreserveMonotremeBranches"
-          "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", "MarsupialTransitionPreservation"
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", "AfrotheriaPreserveTransitions"
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "PreserveBigCats" 
-          "vs_HLursThi1", "vs_ursMar1", "vs_HLursArc1", "vs_HLailMel2", "UrsaPreserveTransition",
-          "vs_lepWed1", "vs_HLmirAng2", "vs_HLphoVit1", "vs_HLeriBar1", "SealPreserveTransitions", 
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", "SealSeaLionPreserveTransitions"
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", "MustelidPreserveTransitions"
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", "OtterPreserveTransitions"
-          "vs_HLlycPic2", "CanidPreserveTransision"
-          "vs_HLgloMel1", "vs_HLpepEle1", "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast","vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", "CetaceaPreserveTransitions"
-          "vs_HLmerUng1", "BankVoleTransition"
-          "vs_HLeulMon1", "vs_HLeulFul1", "LemurTransition"
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", "PrimateTransitions"
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", "PrimateTransitionsContinued"
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", "PrimateTransitionsContinuedAgain"
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", "Drilltransitions"
-          "vs_HLtraJav1", "MouseDeerUsedInOtherAnalysis
-          "vs_mm10", "humans"
-          "vs_HLmarFla1", "marmotClade" "DoormouseTransition"
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-
-args = c('r=CategoricalInsVertivoreTreeLiamInference', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=DerekDietClassification90InsVertivoreSorting', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01',
-         'c=c(
-              "C-Invertebrate-eater", "C-Endotherm-Carnivore", "C-Herpetivore", "C-Piscivore", "C-Nonspecific-Vertebrate-eater", "C-Scavenger", 
-              "O-For Examination", "O-Scavenger", 
-              "H-Frugivore", "H-Nectarivore", "H-Granivore", "H-Nonspecific-Herbivore", 
-              "C-Terrestrial-vertebrates-eater", "C-All-vertebrate-eater", "C-All-Animals-Eater", 
-              "H-High-sugar-plants-Eater", "H-Low-sugar-plants-Eater", "H-All-plants-Eater", 
-              "O-Generalist", 
-              "C-InsVertivore-Mixed", "C-InsVertivore-Piscivore", "C-InsVertivore-Insectivore","C-InsVertivore-Carnivore",
-              "Insectivore", "Herpetivore", "Piscivore", "Vertivore", "InsVertivore", "Omnivore", "Frugivore", "Nectarivore", "Glucivore", "Herbivore", "Generalist"
-            )', 
-         'u=list(
-            c("C-Invertebrate-eater", "Insectivore"), c("C-InsVertivore-Insectivore", "Insectivore"),
-            c("C-Herpetivore", "Vertivore"),
-            c("C-Piscivore", "Vertivore"), c("C-InsVertivore-Piscivore", "Vertivore"),
-            c("C-Endotherm-Carnivore", "Vertivore"), c("C-Scavenger", "Vertivore"), c("C-Nonspecific-Vertebrate-eater", "Vertivore"),
-            c("C-Terrestrial-vertebrates-eater", "Vertivore"), c("C-All-vertebrate-eater", "Vertivore"), c("C-InsVertivore-Carnivore", "Vertivore"),
-            c("C-InsVertivore-Mixed", "Omnivore"), 
-            c("O-For Examination", "Omnivore"), c("O-Scavenger", "Omnivore"),
-            c("H-Frugivore", "Herbivore"), 
-            c("H-Nectarivore", "Herbivore"), 
-            c("H-High-sugar-plants-Eater", "Herbivore"),
-            c("H-Granivore", "Herbivore"), c("H-Nonspecific-Herbivore", "Herbivore"), 
-            c("H-Low-sugar-plants-Eater", "Herbivore"), c("H-All-plants-Eater", "Herbivore"),
-            c("O-Generalist", "Omnivore")
-          )', 
-         'y=c(
+          'y=c(
           "vs_HLornAna3", "vs_HLtacAcu1",  "PreserveMonotremeBranches",
           "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", "MarsupialTransitionPreservation",
           "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", "AfrotheriaPreserveTransitions",
-          "vs_HLpanLeo1", "LionClade", "vs_HLpanOnc1", "vs_HLaciJub2", "CheetahClade", "PreserveBigCats", 
           "vs_HLursThi1", "vs_ursMar1", "vs_HLursArc1", "vs_HLailMel2", "UrsaPreserveTransition",
-          "vs_lepWed1", "vs_HLmirAng2", "vs_HLphoVit1", "vs_HLeriBar1", "SealPreserveTransitions", 
+          "vs_lepWed1", "vs_HLmirAng2", "vs_HLphoVit1", "vs_HLeriBar1", "SealPreserveTransitions",
           "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", "SealSeaLionPreserveTransitions",
           "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", "MustelidPreserveTransitions",
-          "vs_HLpteBra1", "vs_HLlutLut1", "vs_enhLutKen1", "OtterPreserveTransitions",
           "vs_HLlycPic2", "CanidPreserveTransision",
           "vs_HLgloMel1", "vs_HLpepEle1", "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast","vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", "CetaceaPreserveTransitions",
           "vs_HLmerUng1", "BankVoleTransition",
           "vs_HLeulMon1", "vs_HLeulFul1", "LemurTransition",
-          "vs_eulMac1", "vs_HLeulFla1", "vs_ponAbe3", "PrimateTransitions",
           "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", "PrimateTransitionsContinued",
           "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", "PrimateTransitionsContinuedAgain",
           "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", "Drilltransitions",
-          "vs_HLtraJav1", "MouseDeerUsedInOtherAnalysis",
-          "vs_mm10", "humans",
-          "vs_HLmarFla1", "marmotClade", "DoormouseTransition"
+          "vs_HLmarFla1", "marmotClade", "DoormouseTransition",
+          "vs_eulMac1", "vs_ponAbe3", "PrimateTransitions"
+          
          )',
          'p=c(
           "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLmusSpi1", "vs_HLmusCar1", "vs_HLmasCou1", "vs_HLmusPah1", "mouseClade",
           "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
           "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
           "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLtraKan1", "mouseDeerOtherIsKept",
           "vs_HLmurAurFea1", "outerVespert",
           "vs_HLmyoLuc1", "Nearctic",
           "vs_myoDav1", "Myotis",
@@ -1090,6 +92,46 @@ args = c('r=CategoricalInsVertivoreTreeLiamInference', 'm=data/zoonomiaAllMammal
           "vs_HLeonSpe1", "Roussetinae"
          )')
 
+}
+{
+  args = c('r=CladeBinaryBovidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
+           'c=c(0, 1)',
+           'a=isBovidae','s=isInAnalysisWithFullFamilies') 
+  args = c('r=CladeBinaryCricetidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
+           'c=c(0, 1)',
+           'a=isCricetidae','s=isInAnalysisWithFullFamilies') 
+  args = c('r=CladeBinaryHystricognathi', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
+           'c=c(0, 1)',
+           'a=isHystricognathi','s=isInAnalysisWithFullFamilies') 
+  args = c('r=CladeBinaryVespertilionidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
+           'c=c(0, 1)',
+           'a=isVespertilionidae','s=isInAnalysisWithFullFamilies') 
+  args = c('r=CladeBinaryPeropdidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
+           'c=c(0, 1)',
+           'a=isPeropdidae','s=isInAnalysisWithFullFamilies') 
+  args = c('r=CladeBinaryCervidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
+           'c=c(0, 1)',
+           'a=isCervidae','s=isInAnalysisWithFullFamilies') 
+  
+}
+
+
+args = c('r=HarshalCategoricalRERNew', 'm=Data/HarshalFakeMainTrees.rds', 
+'d=Data/VGP_mammals_Diet.csv', 
+'n=Accession',
+'a=trophic_level',
+'c=c("Herbivore", "Carnivore", "Omnivore")',
+'v=T', 't=ER', 'l=T')
+
+args = c('r=PosterTreeNew', 'm=Data/LeahFakeMainTrees.rds', 
+         'd=Data/LeahPosterData.csv', 
+         'n=ScientificName',
+         'a=Four_Diet',
+         'c=c("Herbivore", "Vertivore", "Invertivore", "Omnivore")',
+         'v=T', 't=ER', 'l=F')
+
+
+#args = c('r=Demo', 'v=T', 'm=C:/Users/mit221/AppData/Local/R/win-library/4.2/RERconverge/extdata/SubsetMammalGeneTrees.txt', 'd=Results/DemoMergedData.csv', 'a=DemoDietPhenotype', 'c=c("Carnivore", "Herbivore", "Omnivore")', 'n=demoTreeTipName')
 
 
 # --- Standard start-up code ---
@@ -1141,6 +183,8 @@ manualPruningProtections = NULL
 pruningPrefrenceColumn = NA
 pruningProtection = F
 manualPruningSpecies = NULL
+useLiam = F
+generateAlternates = F
 
   #MainTrees Location
   if(!is.na(cmdArgImport('m'))){
@@ -1246,6 +290,22 @@ manualPruningSpecies = NULL
     usingPruning = T
   }else{
     if(usingPruning){message("No manually pruned species specified")}
+  }
+
+  #use Liam Infrence
+  if(!is.na(cmdArgImport('l'))){
+    useLiam = as.logical(cmdArgImport('l'))
+    message("Using Liam infrence -- DO NOT DO THIS UNLESS USING A SPECIFIC LIAM PHENOTYPE")
+  }else{
+    message("Liam infrence not used.")
+  }
+
+  #generate alternates
+  if(!is.na(cmdArgImport('e'))){
+    generateAlternates = as.logical(cmdArgImport('e'))
+    message("Generating Alternates")
+  }else{
+    message("Not Generating Alternates.")
   }
 
 
@@ -1359,9 +419,9 @@ if(!file.exists(speciesFilterFilename) | forceUpdate){                          
 }
 
 # - Phenotype Vector - 
-relevantSpecies = relevantSpecies[relevantSpecies[[nameColumn]] %in% speciesFilter, ] 
-speciesNames = relevantSpecies[[nameColumn]]                                         #Exract the tip name of each species
-speciesCategories = relevantSpecies[[annotColumn]]                              #extract the category of each species (in same order)
+filteredSpecies = relevantSpecies[relevantSpecies[[nameColumn]] %in% speciesFilter, ] 
+speciesNames = filteredSpecies[[nameColumn]]                                         #Exract the tip name of each species
+speciesCategories = filteredSpecies[[annotColumn]]                              #extract the category of each species (in same order)
 
 phenotypeVector = speciesCategories                                             #combine those into⌄
 names(phenotypeVector) = speciesNames                                           #the format the functions expect
@@ -1376,20 +436,82 @@ if(!is.null(substitutions) & !all(is.na(substitutions))){
 phenotypeVectorFilename = paste(outputFolderName, filePrefix, "CategoricalPhenotypeVector.rds",sep="") #make a filename based on the prefix
 saveRDS(phenotypeVector, file = phenotypeVectorFilename)                        #save the phenotype vector
 
-# - Make common name versions of objects (used in visualization) - 
-commonMainTrees = mainTrees
-commonMainTrees$masterTree = ZoonomTreeNameToCommon(commonMainTrees$masterTree, manualAnnotLocation = spreadSheetLocation, tipCol = nameColumn)
-commonPhenotypeVector = phenotypeVector
-names(commonPhenotypeVector) = ZonomNameConvertVectorCommon(names(commonPhenotypeVector), annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
-commonSpeciesFilter = ZonomNameConvertVectorCommon(speciesFilter, annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
 
-# - Categorical Tree - 
-treeImageFilename = paste(outputFolderName, filePrefix, "CategoricalTree.pdf", sep="") #make a filename based on the prefix
-pdf(treeImageFilename, height = length(phenotypeVector)/18, width = 10)                     #make a pdf to store the plot, sized based on tree size
-  commonCategoricalTree = char2TreeCategorical(commonPhenotypeVector, commonMainTrees, commonSpeciesFilter, model = modelType, anctrait = ancestralTrait, plot = T)
+if(!useLiam){
+  # - Make common name versions of objects (used in visualization) - 
+  commonMainTrees = mainTrees
+  commonMainTrees$masterTree = ZoonomTreeNameToCommon(commonMainTrees$masterTree, manualAnnotLocation = spreadSheetLocation, tipCol = nameColumn)
+  commonPhenotypeVector = phenotypeVector
+  names(commonPhenotypeVector) = ZonomNameConvertVectorCommon(names(commonPhenotypeVector), annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+  commonSpeciesFilter = ZonomNameConvertVectorCommon(speciesFilter, annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+  
+  # - Categorical Tree - 
+  treeImageFilename = paste(outputFolderName, filePrefix, "CategoricalTree.pdf", sep="") #make a filename based on the prefix
+  pdf(treeImageFilename, height = length(phenotypeVector)/18, width = 10)                     #make a pdf to store the plot, sized based on tree size
+    commonCategoricalTree = char2TreeCategorical(commonPhenotypeVector, commonMainTrees, commonSpeciesFilter, model = modelType, anctrait = ancestralTrait, plot = T)
+  
+    categoricalTree = char2TreeCategorical(phenotypeVector, mainTrees, speciesFilter, model = modelType, anctrait = ancestralTrait, plot = T) #use the phenotype vector to make a tree
+  dev.off()                                                                       #save the plot to the pdf
+}else{
+  
+  masterTree = mainTrees$masterTree
+  
+  #nodesToAdd = c(455, 457, 471, 650, 492)
+  #names(nodesToAdd) = c("Mammalia", "Marsupalia", "Placentalia", "Chiroptera", "Primates")
+  #phenToAdd = c("Insectivore", "Insectivore", "Insectivore", "Insectivore", "Omnivore")
+  nodesToAdd = c(785)
+  names(nodesToAdd) = c("Placentalia")
+  phenToAdd = c("Carnivore")
+  
+  masterTreeAdded = masterTree
+  for(i in 1:length(nodesToAdd)){
+    M<-matchNodes(masterTree,masterTreeAdded,method="distances")
+    masterTreeAdded<-bind.tip(masterTreeAdded,names(nodesToAdd)[i],edge.length=0,
+                              where=M[which(M[,1]==as.numeric(nodesToAdd[i])),2])
+  }
+  mainTrees$masterTree = masterTreeAdded
+  
+  
+  names(phenToAdd) = names(nodesToAdd)
+  
+  phenotypeVector = append(phenotypeVector, phenToAdd)
+  speciesFilter = append(speciesFilter, names(phenToAdd))
+  
+  
+  # - Make common name versions of objects (used in visualization) - 
+  commonMainTrees = mainTrees
+  commonMainTrees$masterTree = ZoonomTreeNameToCommon(commonMainTrees$masterTree, manualAnnotLocation = spreadSheetLocation, tipCol = nameColumn)
+  commonPhenotypeVector = phenotypeVector
+  names(commonPhenotypeVector) = ZonomNameConvertVectorCommon(names(commonPhenotypeVector), annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+  commonSpeciesFilter = ZonomNameConvertVectorCommon(speciesFilter, annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+  
+  # - Categorical Tree - 
+  treeImageFilename = paste(outputFolderName, filePrefix, "CategoricalTree.pdf", sep="") #make a filename based on the prefix
+  palette(c( "darkgreen", "darkblue","black", "red"))
+  
+  pdf(treeImageFilename, height = length(phenotypeVector)/18, width = 10)                     #make a pdf to store the plot, sized based on tree size
+  commonCategoricalTree = char2TreeCategorical(commonPhenotypeVector, commonMainTrees, commonSpeciesFilter, model = modelType, anctrait = ancestralTrait, plot = F)
+  categoricalTree = char2TreeCategorical(phenotypeVector, mainTrees, speciesFilter, model = modelType, anctrait = ancestralTrait, plot = F) #use the phenotype vector to make a tree
+  
+  commonCategoricalTreeExtraTip = commonCategoricalTree
+  categoricalTreeExtraTip = categoricalTree
+  
+  commonCategoricalTree = drop.tip(commonCategoricalTree, names(nodesToAdd))
+  categoricalTree = drop.tip(categoricalTree, names(nodesToAdd))
+  mainTrees$masterTree = drop.tip(mainTrees$masterTree, names(nodesToAdd))
+  commonMasterAdded = commonMainTrees$masterTree
+  commonMainTrees$masterTree = drop.tip(commonMainTrees$masterTree, names(nodesToAdd))
+  
+  plotTreeCategorical(commonCategoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = commonMainTrees$masterTree)
+  plotTreeCategorical(categoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = mainTrees$masterTree)
+  
+  plotTreeCategorical(commonCategoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = commonMasterAdded)
+  plotTreeCategorical(categoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = masterTreeAdded)
+  dev.off()  
+  
+}
 
-  categoricalTree = char2TreeCategorical(phenotypeVector, mainTrees, speciesFilter, model = modelType, anctrait = ancestralTrait, plot = T) #use the phenotype vector to make a tree
-dev.off()                                                                       #save the plot to the pdf
+
  
 scientificCategoricalTree = ZoonomTreeNameToCommon(commonCategoricalTree, manualAnnotLocation = spreadSheetLocation, tipCol = "CommonName", scientific = T, scientificCol = "Scientific_Binomial", plot = F)
 
@@ -1400,57 +522,221 @@ saveRDS(commonCategoricalTree, categoricalCommonTreeFilename)
 scientificCategoricalTreeFilename = paste(outputFolderName, filePrefix, "CategoricalScientificTree.rds", sep="") #make a filename based on the prefix
 saveRDS(scientificCategoricalTree, scientificCategoricalTreeFilename)
 
-
-
-# - Paths - 
-#pathsFilename = paste(outputFolderName, filePrefix, "CategoricalPathsFile.rds", sep= "") #make a filename based on the prefix
-#paths = char2PathsCategorical(phenotypeVector, mainTrees, speciesFilter, model = modelType, anctrait = ancestralTrait) #make a path based on the phenotype vector
-#saveRDS(paths, file = pathsFilename)                                            #save the path 
+phenotypeVectorSaving = data.frame(names(phenotypeVector), names(commonPhenotypeVector), phenotypeVector)
+directReadablePhenotypeVectorFilename = paste(outputFolderName, filePrefix, "CategoricalPhenotypeVector.csv",sep="")
+write.csv(phenotypeVectorSaving, directReadablePhenotypeVectorFilename)
 
 
 
+if(generateAlternates){
+    
+    #Load in necessary script
+    source("Src/Reu/CategoricalDropTip.R")
+    
+    #Load in the full tree with all species
+    fullTreePrefix = paste0(filePrefix, "AllSpecies")
+    fullTreeOutputFolder = paste0(outputFolderNameNoSlash, "AllSpecies", "/")
+    tryCatch({
+      allSpeciesTreeFilename = paste(fullTreeOutputFolder, fullTreePrefix, "CategoricalTree.rds", sep="") #make a filename based on the prefix
+      allSpeciesTree = readRDS(allSpeciesTreeFilename)
+      haveAllSpeciesTree = T
+    }, 
+    error=function(i){
+      haveAllSpeciesTree = F
+      message("No All Species tree found. Generating alternates, but not creating trees for them. ")
+    }
+    )
+    
+    
+    phenotypeSizes = table(phenotypeVector)
+    
+    fullSpeciesNames = relevantSpecies[[nameColumn]]                                         #Exract the tip name of each species
+    fullSpeciesCategories = relevantSpecies[[annotColumn]]                              #extract the category of each species (in same order)
+    fullDataPhenotype = fullSpeciesCategories
+    names(fullDataPhenotype) = fullSpeciesNames 
+    if(!is.null(substitutions) & !all(is.na(substitutions))){
+      for( i in 1:length(substitutions)){
+        substitutePhenotypes = substitutions[[i]]
+        message(paste("replacing", substitutePhenotypes[1], "with", substitutePhenotypes[2]))
+        fullDataPhenotype = gsub(substitutePhenotypes[1], substitutePhenotypes[2], fullDataPhenotype)
+      }
+    }
+    length(fullDataPhenotype)
+    
+    fullPhenotypeSizes = table(fullDataPhenotype)
+    
+    mastertreeDataPhenotype = fullDataPhenotype[names(fullDataPhenotype) %in% mainTrees$masterTree$tip.label]
+    length(mastertreeDataPhenotype)
+    masterTreePhenotypeSizes = table(mastertreeDataPhenotype)
+    
+    
+    alternateSets = list()
+    i=1
+    while(length(alternateSets) < 100){
+      
+      randomizedSpeciesSet = character()
+      if(useLiam){
+        
+        Bovidae = manualAnnots[manualAnnots$MSWC_Family %in% "Bovidae",][[nameColumn]]
+        Pteropodidae = manualAnnots[manualAnnots$MSWC_Family %in% "Pteropodidae",][[nameColumn]]
+        Cervidae = manualAnnots[manualAnnots$MSWC_Family %in% "Cervidae",][[nameColumn]]
+        Cricetidae = manualAnnots[manualAnnots$MSWC_Family %in% "Cricetidae",][[nameColumn]]
+        
+        Vespertilionidae = manualAnnots[manualAnnots$MSWC_Family %in% "Vespertilionidae",][[nameColumn]]
+        
+        HystricognathiFamilies =  c("Caviidae", "Chinchillidae", "Ctenomyidae", "Dasyproctidae", "Dinomyidae", "Caviidae", "Bathyergidae", "Caviidae", "Hystricidae", "Myocastoridae", "Octodontidae", "Petromuridae", "Thryonomyidae", "Erethizontidae")
+        Hystricognathi = manualAnnots[manualAnnots$MSWC_Family %in% HystricognathiFamilies,][[nameColumn]]
+        
+        numPerClade = 3
+        
+        selectedBovids = sample(Bovidae, numPerClade)
+        selectedPteropodidae = sample(Pteropodidae, numPerClade)
+        selectedCervidae = sample(Cervidae, numPerClade)
+        selectedCricetidae = sample(Cricetidae, numPerClade)
+        selectedHystricognathi = sample(Hystricognathi, numPerClade)
+        
+        selectedVespertilionidae = sample(Vespertilionidae, numPerClade)
+        
+        speciesInLargeFamilies = c(Bovidae, Pteropodidae, Cervidae, Cricetidae, Hystricognathi, Vespertilionidae)
+        
+        randomizedSpeciesSet = append(randomizedSpeciesSet, selectedBovids)
+        randomizedSpeciesSet = append(randomizedSpeciesSet, selectedPteropodidae)
+        randomizedSpeciesSet = append(randomizedSpeciesSet, selectedCervidae)
+        randomizedSpeciesSet = append(randomizedSpeciesSet, selectedCricetidae)
+        randomizedSpeciesSet = append(randomizedSpeciesSet, selectedHystricognathi)
+        
+        randomizedSpeciesSet = append(randomizedSpeciesSet, selectedVespertilionidae)
+        
+        
+        
+        
+        
+        for(j in 1:length(phenotypeSizes)){
+          numberOfSpecies = phenotypeSizes[j]
+          speciesSet = mastertreeDataPhenotype[which(mastertreeDataPhenotype == names(phenotypeSizes)[j])]
+          
+          speciesInLargeFamilies = which(names(speciesSet) %in% speciesInLargeFamilies)
+          preselectedSpecies = speciesSet[which(names(speciesSet) %in% randomizedSpeciesSet)]
+          speciesSet = speciesSet[-speciesInLargeFamilies]
+          
+          
+          numberOfSpecies = numberOfSpecies - length(preselectedSpecies)
+          
+          
+          chosenSpecies = sample(speciesSet, numberOfSpecies)
+          randomizedSpeciesSet = append(randomizedSpeciesSet, chosenSpecies)
+        }
+      
+      }else{
+        for(j in 1:length(phenotypeSizes)){
+          numberOfSpecies = phenotypeSizes[j]
+          speciesSet = mastertreeDataPhenotype[which(mastertreeDataPhenotype == names(phenotypeSizes)[j])]
+          chosenSpecies = sample(speciesSet, numberOfSpecies)
+          randomizedSpeciesSet = append(randomizedSpeciesSet, chosenSpecies)
+        } 
+      }
 
+      
+      testTree = mainTrees$masterTree
+      tipsToDrop = testTree$tip.label[!testTree$tip.label %in% names(randomizedSpeciesSet)]
+      testTree = drop.tip(testTree, tipsToDrop)
+      i=i+1
+      if(i %% 10000 == 0){message(i)}
+      if(min(testTree$edge.length) < pruningCutoff){
+        message("Found Valid Alternate")
+        message(i)
+        alternateTips = testTree$tip.label
+        alternateTips = list(alternateTips)
+        alternateSets = append(alternateSets, alternateTips)
+      }
+    }
+    
+  saveRDS(alternateSets, paste0(outputFolderName, filePrefix, "AlternatePruningSpecies.rds"))
+    
+  
+  if(!dir.exists(paste0("Output/", filePrefix, "/Alternates"))){                                      #Make output directory if it does not exist
+    dir.create(paste0("Output/", filePrefix, "/Alternates"))
+  }
+  
+  
+  for(i in 1:length(alternateSets)){
+    currentSet = alternateSets[[i]]
+    alternateFilePrefix = paste0("/Alternates/Alternate", i)
+    
+    
+    currentPhenotypeVector = fullDataPhenotype[which(names(fullDataPhenotype) %in% currentSet)]
+    currentCommonPhenotypeVector = currentPhenotypeVector
+    names(currentCommonPhenotypeVector) = ZonomNameConvertVectorCommon(names(currentCommonPhenotypeVector), annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+    
+    
+    currentPhenotypeVectorSaving = data.frame(names(currentPhenotypeVector), names(currentCommonPhenotypeVector), currentPhenotypeVector)
+    currentDirectReadablePhenotypeVectorFilename = paste(outputFolderName, alternateFilePrefix, filePrefix, "CategoricalPhenotypeVector.csv",sep="")
+    write.csv(currentPhenotypeVectorSaving, currentDirectReadablePhenotypeVectorFilename) 
+    
+    currentSpeciesFilterFilename =  paste(outputFolderName, alternateFilePrefix, filePrefix, "SpeciesFilter.rds",sep="") #set a filename for the species filter based on the prefix 
+    currentSpeciesFilter = currentSet
+    saveRDS(currentSpeciesFilter, currentSpeciesFilterFilename)
+  }
+  
+  
+  if(haveAllSpeciesTree){
+    mainTrees = readRDS(mainTreesLocation) #refreshes the main tree from any changes made during pruning step 
+    
+    
+    commonMainTrees = mainTrees
+    commonMainTrees$masterTree = ZoonomTreeNameToCommon(commonMainTrees$masterTree, manualAnnotLocation = spreadSheetLocation, tipCol = nameColumn)
+    
+    for(i in 1:length(alternateSets)){
+      message(i)
+      currentSet = alternateSets[[i]]
+      alternateFilePrefix = paste0("/Alternates/Alternate", i)
+      
+      
+      currentPhenotypeVector = fullDataPhenotype[which(names(fullDataPhenotype) %in% currentSet)]
+      currentCommonPhenotypeVector = currentPhenotypeVector
+      names(currentCommonPhenotypeVector) = ZonomNameConvertVectorCommon(names(currentCommonPhenotypeVector), annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+      
+      
+      currentPhenotypeVectorSaving = data.frame(names(currentPhenotypeVector), names(currentCommonPhenotypeVector), currentPhenotypeVector)
+      currentDirectReadablePhenotypeVectorFilename = paste(outputFolderName, alternateFilePrefix, filePrefix, "CategoricalPhenotypeVector.csv",sep="")
+      write.csv(currentPhenotypeVectorSaving, currentDirectReadablePhenotypeVectorFilename)  
+      
+      currentPhenotypeVectorFilename = paste(outputFolderName, alternateFilePrefix, filePrefix, "CategoricalPhenotypeVector.rds",sep="") #make a filename based on the prefix
+      saveRDS(currentPhenotypeVector, file = currentPhenotypeVectorFilename)                        #save the phenotype vector
+      
+      
+      
+      tipsToRemove = allSpeciesTree$tip.label[!allSpeciesTree$tip.label %in% currentSet]
+      currentTree = categoricalDropTip(allSpeciesTree, tipsToRemove)
+      currentCommonSpeciesFilter = ZonomNameConvertVectorCommon(currentSet, annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+      
+      # - Categorical Tree - 
+      currentCategoricalTree = currentTree
+      currentCommonCategoricalTree = currentTree
+      currentCommonCategoricalTree$tip.label = ZonomNameConvertVectorCommon(currentCommonCategoricalTree$tip.label, annotationLocation = spreadSheetLocation, tipColumn = nameColumn)
+      
+      if(useLiam){
+      
+        treeImageFilename = paste(outputFolderName, alternateFilePrefix, filePrefix,"CategoricalTree.pdf", sep="") #make a filename based on the prefix
+        pdf(treeImageFilename, height = length(currentPhenotypeVector)/18, width = 10)                     #make a pdf to store the plot, sized based on tree size
+        palette(c( "darkgreen", "darkblue","black", "red"))
 
+        plotTreeCategorical(currentCommonCategoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = commonMainTrees$masterTree)
+        plotTreeCategorical(currentCategoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = mainTrees$masterTree)
+        
+        dev.off()  
+      }
+      
+      
+      currentCategoricalTreeFilename = paste(outputFolderName, alternateFilePrefix, filePrefix, "CategoricalTree.rds", sep="") #make a filename based on the prefix
+      saveRDS(currentCategoricalTree, currentCategoricalTreeFilename)                               #save the tree
+      currentCategoricalCommonTreeFilename = paste(outputFolderName, alternateFilePrefix, filePrefix, "CategoricalCommonTree.rds", sep="") #make a filename based on the prefix
+      saveRDS(currentCommonCategoricalTree, currentCategoricalCommonTreeFilename)
+      
+    }
+  }
 
-# -- Convert Tree to Binary (Manual only) --
-convertToBinary = T
-convertToBinary = F
-convertToBinaryStandalone = T
-convertToBinaryStandalone = F
-foreground = "Insectivore"
-
-if(convertToBinaryStandalone){
-  categoricalTreeFilename = paste(outputFolderName, filePrefix, "CategoricalTree.rds", sep="") #make a filename based on the prefix
-  categoricalTree = readRDS(categoricalTreeFilename)
-  phenotypeVectorFilename = paste(outputFolderName, filePrefix, "CategoricalPhenotypeVector.rds",sep="") #make a filename based on the prefix
-  speciesFilterFilename = paste(outputFolderName, filePrefix, "SpeciesFilter.rds",sep="") #set a filename for the species filter based on the prefix 
-  relevantSpecieslist = readRDS(speciesFilterFilename)                          #if not, use the existing list 
-  speciesFilter = relevantSpecieslist                                           #make the speciesFilter object for later 
+  
 }
 
-if(convertToBinary){
-  
-  binaryTree = categoricalTree
-  phenotypeVector = readRDS(phenotypeVectorFilename)                            #load in the phenotype vector 
-  categories = map_to_state_space(phenotypeVector) 
-  categoryNames = categories$name2index                                         #store the length-phenotype connection
-  foregroundInt = categoryNames[which(names(categoryNames) == foreground)]
-  binaryTree$edge.length[-(which(binaryTree$edge.length == foregroundInt))] = 0
-  binaryTree$edge.length[(which(binaryTree$edge.length == foregroundInt))] = 1
-  
-  binaryTreeImageFilename = paste(outputFolderName, filePrefix, "BinaryTree.pdf", sep="") #make a filename based on the prefix
-  pdf(binaryTreeImageFilename, height = length(phenotypeVector)/7)                     #make a pdf to store the plot, sized based on tree size
-  source("Src/Reu/plotBinaryTree.R")
-  plotBinaryTree(mainTrees, binaryTree, mainTitle = paste(filePrefix, "Binary", "Foreground", "Tree"), tipColumn = nameColumn)
-  plotBinaryTree(mainTrees, binaryTree, convertNames = F, mainTitle = paste(filePrefix, "Binary", "Foreground", "Tree"), tipColumn = nameColumn)
-  plotTree(binaryTree)
-  dev.off()                                                                       #save the plot to the pdf
-  
-  binaryTreeFilename = paste(outputFolderName, filePrefix, "BinaryTree.rds", sep="") #make a filename based on the prefix
-  saveRDS(binaryTree, binaryTreeFilename)                               #save the tree
-  
-  # - Paths - 
-  binaryPathsFilename = paste(outputFolderName, filePrefix, "PathsFile.rds", sep= "") #make a filename based on the prefix
-  binaryPaths = tree2Paths(binaryTree, mainTrees, binarize = T, speciesFilter) #make a path based on the phenotype vector
-  saveRDS(binaryPaths, file = binaryPathsFilename) 
-}
+

@@ -5,7 +5,7 @@ if(clusterRun){.libPaths("/share/ceph/wym219group/shared/libraries/R4")} #add pa
 library(RERconverge)
 library("tools")
 source("Src/Reu/cmdArgImport.R")
-library(xlsx)
+if(!clusterRun){library(xlsx)}
 
 
 # -- Usage:
@@ -21,63 +21,16 @@ library(xlsx)
 # f = "permulationPvalueFileLocation.rds"   This is a manual override to specify the script use a specific Permulation p-value file.
     #If using any file other than "CombinedPrunedFastAll" with no run instance number, it must be specified manually.
 #----------------
-#'m=c("Data/tissue_specific.gmt", "Data/GSEA-c5-HsSymbols.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")'
-#'m=c("Data/DisGeNET.gmt", "Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt")'
-args = c('r=CategoricalDiet4Phen', "s=_Omnivore-Carnivore", 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=T') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=LiverExpression',  'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=F') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=EcholocationUpdate',  'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=T') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=CategoricalDiet4Phen', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "_Omnivore-carnivore")', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=F') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=CategoricalDiet5Phen', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "_Omnivore-Piscivore", "Carnivore-Piscivore", "Herbivore-Piscivore", "Insectivore-Piscivore", "_Omnivore-carnivore")', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=F') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=CategoricalDiet3Phen', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Carnivore", "Overall")', 'p=T')
-args = c('r=LiverExpression3', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=T', "c=LiverExpression3CorrelationDataPermulatedNamesConverted.rds")
-args = c('r=EcholocationUpdate2',  'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=T') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=CVHRemake',  'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'v=T', 'p=T') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=CategoricalDiet3Phen', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Carnivore", "Overall")', 'p=C')
-args = c('r=CVHRemake',  'm=c("Data/customGeneSet.gmt")', 'v=T', 'p=T') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
-args = c('r=CategoricalDiet3Phen', 'm=c("Data/customGeneSet.gmt")', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Carnivore", "Overall")', 'p=C')
-args = c('r=LiverExpression3', 'm=c("Data/customGeneSet.gmt")', 'p=T', "c=LiverExpression3CorrelationDataPermulatedNamesConverted.rds")
 
 
-args = c('r=NewHiller4Phen', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("_Omnivore-Carnivore", "_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "Overall")')
-args = c('r=NewHillerTestSupraPrimates', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("0-1", "Overall")')
-args = c('r=NewHillerTestSupraPrimates', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("0-1", "Overall")')
-args = c('r=NewHillerTestSupraPrimates', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("0-1", "Overall")')
+args = c('r=ComplexDietCentralAnalysis', 'm=c("Data/KeggReactome.gmt")', 'p=C', 's=c("Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
 
-args = c('r=MaturityLifespanPercent', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F')
-args = c('r=MaturityLifespanPercent', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=T', 'f=MaturityLifespanPercentPermulationPValue.rds')
-args = c('r=MaturityLogRaw', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F')
-args = c('r=PankajBodysize', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F')
-
-
-args = c('r=MaturityLifespanPercent', 'm=c("Data/YifanGenesets.gmt")', 'p=T', 'f=MaturityLifespanPercentPermulationPValue.rds')
-args = c('r=MaturityLogRaw', 'm=c("Data/YifanGenesets.gmt")', 'p=F')
-
-
-
-args = c('r=CategoricalMobivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
-args = c('r=CategoricalCarnivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")' )
-
-args = c('r=CategoricalInsVertivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
-args = c('r=CategoricalPrunedCarnivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")' )
-args = c('r=CategoricalBinaryInsectivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Insectivore", "Overall")' )
-args = c('r=CategoricalBinaryVertivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Vertivore", "Overall")' )
-args = c('r=CategoricalBinaryHerbivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Herbivore", "Overall")' )
-args = c('r=CategoricalBinaryOmnivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Omnivore", "Overall")' )
-
-
-args = c('r=CategoricalInsVertivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
-
-args = c('r=CategoricalInsVertivoreTree', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
-args = c('r=CategoricalPrunedCarnivoreTree', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")' )
-
-args = c('r=meanTemp', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt", "Data/KeggReactome.gmt")', 'p=F')
-
-
-args = c('r=CategoricalInsVertivoreTreeLiamInference', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
-args = c('r=CategoricalInsVertivoreTreeLiamInference', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
-
-args = c('r=CategoricalInsVertivoreTreeCarnivoreLiamInference', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("Carnivore-Omnivore", "Carnivore-Herbivore", "Herbivore-Omnivore", "Overall")' )
-args = c('r=CategoricalInsVertivoreTreeCarnivoreLiamInference', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Carnivore-Omnivore", "Carnivore-Herbivore", "Herbivore-Omnivore", "Overall")' )
+args = c('r=CladeBinaryBovidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
+args = c('r=CladeBinaryCervidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
+args = c('r=CladeBinaryCricetidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
+args = c('r=CladeBinaryHystricognathi', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
+args = c('r=CladeBinaryPeropdidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
+args = c('r=CladeBinaryVespertilionidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
 
 
 # --- Standard start-up code ---
@@ -113,7 +66,7 @@ if(clusterRun){args = commandArgs(trailingOnly = TRUE)}
 # --- Argument Imports ---
 # Defaults
 gmtFileLocation = "Data/enrichmentGmtFile.gmt"
-usePermulations = TRUE
+usePermulations = FALSE
 usePermulationPValOverride = FALSE
 permulationPValOverride = NULL 
 useCorrelationOverride = FALSE
@@ -200,7 +153,7 @@ for(i in 1:length(subdirectoryValueList)){
   
   if(usePermulations){                                                            #If permualtions are being used   
     if(useCategoricalPermulations){
-      correlationData$P = correlationData$permP
+        correlationData$P = correlationData$permP
     }else{
       if(usePermulationPValOverride){                                               #check for a location override
         permulationFileLocation = paste(outputFolderName, permulationPValOverride, sep="")                           #if so, use it 
@@ -220,22 +173,31 @@ for(i in 1:length(subdirectoryValueList)){
   
   rerStats = getStat(correlationData)                                             #processes the RERs somewhat into stat values. only uses the P column, and the sign of the Rho column. 
   
-  for(i in 1:length(gmtFileLocation)){
+  if(usePermulations == F){
+    enrichmentCsvName = paste(outputFolderName, filePrefix, subdirectoryValue, "Enrichments.xlsx", sep= "") #make a filename based on the prefix and geneset
+  }else{
+    enrichmentCsvName = paste(outputFolderName, filePrefix, subdirectoryValue, "Permulation-Enrichments.xlsx", sep= "") #make a filename based on the prefix and geneset
+  }
+  if(!clusterRun){file.remove(enrichmentCsvName)}
+  for(j in 1:length(gmtFileLocation)){
   #Load the gmt annotations 
-  gmtAnnotations = read.gmt(gmtFileLocation[i])                                      #read the gmt file
+  gmtAnnotations = read.gmt(gmtFileLocation[j])                                      #read the gmt file
   annotationsList = list(gmtAnnotations)                                          #reformat it into the format the next fuction expects
-  enrichmentListName = substring(gmtFileLocation[i], 6, last = (nchar(gmtFileLocation[i]) - 4)) #make a geneset name based on the filename 
+  enrichmentListName = substring(gmtFileLocation[j], 6, last = (nchar(gmtFileLocation[j]) - 4)) #make a geneset name based on the filename 
   names(annotationsList) = enrichmentListName                                     #name geneset list with that name 
   
   enrichmentResult = fastwilcoxGMTall(rerStats, annotationsList, outputGeneVals = T, num.g =2) #run enrichment analysis 
   
   #save the enrichment output
-  enrichmentFileName = paste(outputFolderName, filePrefix, subdirectoryValue, "Enrichment-", enrichmentListName, ".rds", sep= "") #make a filename based on the prefix and geneset
+  if(usePermulations == F){
+    enrichmentFileName = paste(outputFolderName, filePrefix, subdirectoryValue, "Enrichment-", enrichmentListName, ".rds", sep= "") #make a filename based on the prefix and geneset
+  }else{
+    enrichmentFileName = paste(outputFolderName, filePrefix, subdirectoryValue, "Enrichment-Permulation-", enrichmentListName, ".rds", sep= "") #make a filename based on the prefix and geneset
+  }
   saveRDS(enrichmentResult, enrichmentFileName)                                   #Save the enrichment 
-  enrichmentCsvName = enrichmentFileName = paste(outputFolderName, filePrefix, subdirectoryValue, "Enrichments.xlsx", sep= "") #make a filename based on the prefix and geneset
   gc()
   if(!i == 0){ #stops from writing two copies of the same sheet when no subdirectories. 
-    write.xlsx(enrichmentResult, file=enrichmentCsvName, sheetName=enrichmentListName, row.names=T, append = T)
+    if(!clusterRun){write.xlsx(enrichmentResult[[1]], file=enrichmentCsvName, sheetName=enrichmentListName, row.names=T, append = T)}
   }
   }
 }
@@ -286,3 +248,4 @@ for(i in 1:length(subdirectoryValueList)){
     }
   }
 }  
+
