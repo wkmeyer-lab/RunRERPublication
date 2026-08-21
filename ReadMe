@@ -1,0 +1,33 @@
+Order of script execution: 
+All scripts use the arguments included at the beginning of the script. 
+
+
+MakeCategoricalPhenotypeTree 
+⌄
+RunRERAndCorrealtion.R
+⌄
+RunMergedAnalysis.R
+⌄
+EnrichmentAnalysisNew.R
+⌄
+CategoricalCOmbinePairwiseResults.R
+
+
+[permulations]
+CategoricalPermulations.R
+⌄
+CateoricalPermualtionsCorrelation.R
+⌄
+CategoricalPermulationsCalculatePValue.R
+
+
+[alternates]
+
+
+ProcessAlternates.R
+⌄
+RunAlternateEnrichments.R
+⌄
+CombineAlternates.R
+⌄
+AddAlternatesToCombinations.R
