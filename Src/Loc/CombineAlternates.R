@@ -14,7 +14,9 @@ library(data.table)
 
 #----------------
 args = c('r=ComplexDietCentralAnalysis', 's=g', 'g=KeggReactome', 'l=170', 'i=1')
-
+args = c('r=ComplexDietCentralAnalysisSimplifyEqualDrop', 's=g', 'g=KeggReactome', 'l=170')
+args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 's=g', 'g=KeggReactome', 'l=170')
+args = c('r=ComplexDietCentralAnalysisSimplify2', 's=g', 'g=KeggReactome', 'l=170')
 
 geneSet = NULL
 useGO = F
@@ -93,8 +95,6 @@ combinedCorrelations <- lapply(names(correlationRuns[[1]]), function(nm) {
 names(combinedCorrelations) <- names(correlationRuns[[1]])
 
 
-
-
 combinedCorrelations <- lapply(combinedCorrelations, function(df) {
   
   #Number of significant
@@ -160,13 +160,14 @@ combinedCorrelations <- lapply(combinedCorrelations, function(df) {
 
 saveRDS(combinedCorrelations, paste0(primaryOutputFolderName, primaryFilePrefix, "AlternatesCombinedCorrelations.rds"))
 
+message("Completed gene combinations")
 
 #----
 #Combine enrichments
 #----
 
 if(useGO){
-  alternateSets = readRDS(paste0(outputFolderName, filePrefix, "AlternatePruningSpecies.rds"))
+  alternateSets = readRDS(paste0(primaryOutputFolderName, primaryFilePrefix, "AlternatePruningSpecies.rds"))
   
   
   subdirectories = list.dirs(paste0(outputFolderName, "Alternates"))
@@ -185,6 +186,7 @@ if(useGO){
   
   if(CombineGo){
     for(j in 1:length(alternateSets)){
+      message(j)
       currentAlternate = j
       filePrefix = paste0("Alternate", j, primaryFilePrefix)
   
@@ -199,6 +201,7 @@ if(useGO){
           
           
           
+          
           #names(currentGoData) = paste0(correlationPrefix, "-", names(currentGoData))
           
     
@@ -208,8 +211,31 @@ if(useGO){
         }
         rm(currentGoData)
         
+        GoCombinedResults = NA
+        longestGOResult = which(sapply(GOResults, nrow) == max(sapply(GOResults, nrow)))[1]
+        for(i in 1:length(GOResults)){
+          if(all(rownames(GOResults[[i]]) == rownames(GOResults[[longestGOResult]]))){
+            cat("Combining GO Data", i, "\n")
+            GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
+          }else{
+            tryCatch({
+              cat("Mismatch in order; reordering current data to first data; Combining GO Data", i, "\n")
+              
+              which(!rownames(GOResults[[longestGOResult]]) %in% rownames(GOResults[[i]]))
+              
+              matchedOrder = match(rownames(GOResults[[longestGOResult]]), rownames(GOResults[[i]]))
+              #matchedOrder = matchedOrder[-which(is.na(matchedOrder))]
+              GOResults[[i]] = GOResults[[i]][matchedOrder,]
+              #GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
+            },error = function(e){      
+              stop("Rownames of GO results are not the same and cannot be reordered, there is an issue with the GO data.")
+            }
+            
+            )
 
-        #rm(GOResults)
+          }
+        }
+        #GoCombinedResults = GoCombinedResults[,-1]
         
        
         
@@ -219,7 +245,7 @@ if(useGO){
         }
     }
   }
-  
+  message("Completed GO combinations for individual alternates")
   
   #---- 
   #combine alternates
@@ -229,6 +255,64 @@ if(useGO){
   EnrichmentFilenames = paste0(primaryOutputFolderName, "Alternates/", EnrichmentFilenames)
   
   EnrichmentRuns = lapply(EnrichmentFilenames[1:length(EnrichmentFilenames)], readRDS)
+  
+  #Set the order of the enrichment runs correctly 
+  
+
+
+  
+  #First, confirm all rownames are the same within the enrichment runs 
+  errorSet = NA
+  for(i in 1:100){
+    mainRowNames = rownames(EnrichmentRuns[[i]][[1]])
+    for(j in 2:length(EnrichmentRuns[[i]])){
+      newRowNames = rownames(EnrichmentRuns[[i]][[j]]) 
+      isEqual = all(newRowNames ==mainRowNames)
+      if(!isEqual){
+        errorCode = paste0(i, "-", j)
+        names(errorCode) = i
+        errorSet = append(errorSet, errorCode)
+      }
+    }
+  }
+  if(!(all(is.na(errorSet)))){
+    message(paste("Problem in rownames of alternate:", unique(names(errorSet))))
+    stop("THERE IS A DIFFERENCE OF ROWNAMES WITHIN AN ALTERNATE, ABORTING")
+  }else{message("Rownames are matched WITHIN all alternates")}
+  
+  #Then, reorder all of the enrichments into that order
+  rownameSets = list()
+  for(i in 1:length(EnrichmentRuns)){
+    currentRownames = rownames(EnrichmentRuns[[i]][[1]])
+    rownameSets = append(rownameSets, list(currentRownames))
+  }
+  
+  longestAlternateGoSetIndex = which(sapply(rownameSets, length) == max(sapply(rownameSets, length)))[1]
+  longestAlternateGoSet = rownameSets[[longestAlternateGoSetIndex]]
+  allIncludedGOSets = unique(unlist(rownameSets))
+  
+  #Check that the longest entry includes all of the contained GO sets 
+  if(!all(allIncludedGOSets %in% longestAlternateGoSet)){
+    stop("The longest GO set does not include all of the included GO sets, stoping combination.")
+  }else{message("Longest GO set confirmed to include all GO sets processed in any alternate")}
+  
+  
+  for(i in 1:length(EnrichmentRuns)){
+    currentRownames = rownameSets[[i]]
+    if(all(currentRownames == longestAlternateGoSet)){
+      message(paste("Alternate ", i, " In correct order, continuing."))
+    }else{
+      message("Reordering Alternate set ", i, " to match longest GO set, confirmed to contain all processed GOs.")
+      matchedOrder = match(longestAlternateGoSet, currentRownames)
+      
+      for(j in 1:length(EnrichmentRuns[[i]])){
+        EnrichmentRuns[[i]][[j]] = EnrichmentRuns[[i]][[j]][matchedOrder, ]
+      }
+    }
+  }
+  
+  
+  
   
   combinedEnrichment <- lapply(seq_along(EnrichmentRuns[[1]]), function(g) {
     
@@ -312,6 +396,12 @@ if(useGO){
     
     df
   })
+  
+  for(i in 1:length(combinedEnrichment)){
+    for(j in 1:length(combinedEnrichment[[i]])){
+      names(combinedEnrichment[[i]][[j]]) = longestAlternateGoSet
+    }
+  }
   
   saveRDS(combinedEnrichment, paste0(primaryOutputFolderName, primaryFilePrefix, "AlternatesCombinedEnrichments-" , geneSet, ".rds"))
   

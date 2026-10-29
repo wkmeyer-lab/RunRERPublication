@@ -32,8 +32,47 @@ source("Src/Reu/cmdArgImport.R")
 
 
 #----------------
+args = c('r=EcholocationUpdate2', 'p=B') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
+args = c('r=CategoricalDiet4Phen', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "_Omnivore-carnivore")', 'p=F')
+args = c('r=CategoricalDiet5Phen', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "_Omnivore-Piscivore", "Carnivore-Piscivore", "Herbivore-Piscivore", "Insectivore-Piscivore", "_Omnivore-carnivore")', 'p=F')
+args = c('r=CategoricalDiet3Phen', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Carnivore")', 'p=CB')
+args = c('r=LiverExpression3', 'p=B') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
+args = c('r=CVHRemake', 'p=B')
+args = c('r=CategoricalDiet3Phen', 's=c("_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Carnivore", "Overall")', 'p=C', 'o=stat', 'u=A')
+args = c('r=CVHRemake', 'p=P', 'o=pval', 'u=F')
 
-args = c('r=ComplexDietCentralAnalysis', 'p=F', 'g=T', 's=c("Carnivore-Herbivore", "Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
+
+args = c('r=NewHiller4Phen', 'p=F', 's=c("_Omnivore-Carnivore", "_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "Overall")')
+args = c('r=NewHillerTestSupraPrimates', 'p=F', 's=c("0-1", "Overall")')
+
+args = c('r=MaturityLifespanPercent', 'p=B', 'g=T', 'f=Output/MaturityLifespanPercent/MaturityLifespanPercentPermulationPValue.rds')
+args = c('r=MaturityLogRaw', 'p=F', 'g=T')
+args = c('r=PankajBodysize', 'p=F', 'g=T')
+
+
+args = c('r=LiverExpression2', 'p=F', 'g=F')
+args = c('r=CategoricalMobivoreTree', 'p=F', 'g=T', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
+
+args = c('r=NewHiller4Phen', 'p=F', 's=c("_Omnivore-Carnivore", "_Omnivore-Herbivore", "Carnivore-Herbivore", "_Omnivore-Insectivore", "Carnivore-Insectivore", "Herbivore-Insectivore", "Overall")')
+
+args = c('r=CategoricalCarnivoreTree', 'p=F', 'g=T', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")' )
+args = c('r=CategoricalInsVertivoreTree', 'p=F', 'g=T', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
+args = c('r=CategoricalPrunedCarnivoreTree', 'p=F', 'g=T', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")' )
+
+args = c('r=CategoricalBinaryInsectivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Insectivore", "Overall")' )
+args = c('r=CategoricalBinaryVertivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Vertivore", "Overall")' )
+args = c('r=CategoricalBinaryHerbivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Herbivore", "Overall")' )
+args = c('r=CategoricalBinaryOmnivoreTree', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/DisGeNET.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Background-Omnivore", "Overall")' )
+
+args = c('r=CategoricalDownsampledInsvertTree', 'p=F', 'g=T', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
+
+args = c('r=CategoricalInsVertivoreTree', 'p=F', 'g=T', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
+args = c('r=meanTemp', 'm=data/zoonomiaAllMammalsTrees.rds', 'p=F','v=T')
+args = c('r=Demo', 'v=F', 'g=F', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")')
+args = c('r=Demo', 'v=F', 'g=T', 's=c("Carnivore-Herbivore", "Carnivore-Omnivore", "Herbivore-Omnivore", "Overall")')
+args = c('r=CategoricalInsVertivoreTreeLiamInference', 'p=F', 'g=T', 's=c("Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
+
+args = c('r=CategoricalInsVertivoreTreeLiamInference', 'p=F', 'g=T', 's=c("Carnivore-Herbivore", "Omnivore-Vertivore", "Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
 
 
 # --- Standard start-up code ---

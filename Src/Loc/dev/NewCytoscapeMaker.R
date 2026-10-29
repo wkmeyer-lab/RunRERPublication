@@ -5,6 +5,67 @@ if(clusterRun){.libPaths("/share/ceph/wym219group/shared/libraries/R4")} #add pa
 library(GSEABase)
 source("Src/Reu/cmdArgImport.R")
 
+args = c("r=CategoricalInsVertivoreTree", "s=Carnivore-Herbivore", 
+         "a=CategoricalBinaryCarnivoreTree", "b=Carnivore", "c=CategoricalBinaryHerbivoreTree", "d=Herbivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+args = c("r=CategoricalInsVertivoreTree", "s=Herbivore-Vertivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+args = c("r=CategoricalInsVertivoreTree", "s=Herbivore-Insectivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryInsectivoreTree", "d=Insectivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+
+args = c("r=CategoricalInsVertivoreTree", "s=Insectivore-Vertivore", 
+         "a=CategoricalBinaryInsectivoreTree", "b=Insectivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+
+
+
+args = c("r=CategoricalInsVertivoreTreeLiamInference", "s=Carnivore-Herbivore", 
+         "a=CategoricalBinaryCarnivoreTree", "b=Carnivore", "c=CategoricalBinaryHerbivoreTree", "d=Herbivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+args = c("r=CategoricalInsVertivoreTreeLiamInference", "s=Herbivore-Vertivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+args = c("r=CategoricalInsVertivoreTreeLiamInference", "s=Herbivore-Insectivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryInsectivoreTree", "d=Insectivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+
+args = c("r=CategoricalInsVertivoreTreeLiamInference", "s=Insectivore-Vertivore", 
+         "a=CategoricalBinaryInsectivoreTree", "b=Insectivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=T")
+
+
+args = c("r=CategoricalInsVertivoreTreeNoYeastLiamInference", "s=Carnivore-Herbivore", 
+         "a=CategoricalBinaryCarnivoreTree", "b=Carnivore", "c=CategoricalBinaryHerbivoreTree", "d=Herbivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+args = c("r=CategoricalInsVertivoreTreeNoYeastLiamInference", "s=Herbivore-Vertivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+args = c("r=CategoricalInsVertivoreTreeNoYeastLiamInference", "s=Herbivore-Insectivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryInsectivoreTree", "d=Insectivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+
+
+args = c("r=CategoricalInsVertivoreTreeFamilyAgnostictLiamInference", "s=Carnivore-Herbivore", 
+         "a=CategoricalBinaryCarnivoreTree", "b=Carnivore", "c=CategoricalBinaryHerbivoreTree", "d=Herbivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+args = c("r=CategoricalInsVertivoreTreeFamilyAgnostictLiamInference", "s=Herbivore-Vertivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+args = c("r=CategoricalInsVertivoreTreeFamilyAgnostictLiamInference", "s=Herbivore-Insectivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryInsectivoreTree", "d=Insectivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+
+args = c("r=ComplexDietCentralAnalysisNoRodent", "s=Carnivore-Herbivore", 
+         "a=CategoricalBinaryCarnivoreTree", "b=Carnivore", "c=CategoricalBinaryHerbivoreTree", "d=Herbivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+args = c("r=ComplexDietCentralAnalysisNoRodent", "s=Herbivore-Vertivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
+args = c("r=ComplexDietCentralAnalysisNoRodent", "s=Herbivore-Insectivore", 
+         "a=CategoricalBinaryHerbivoreTree", "b=Herbivore", "c=CategoricalBinaryInsectivoreTree", "d=Insectivore",
+         "o=T", 'l=c("HV", "HI", "CH")', "k=H", "i=F")
 
 args = c("r=ComplexDietCentralAnalysis", "s=Insectivore-Vertivore", 
          "a=CategoricalBinaryInsectivoreTree", "b=Insectivore", "c=CategoricalBinaryVertivoreTree", "d=Vertivore",

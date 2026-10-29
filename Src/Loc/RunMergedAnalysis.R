@@ -13,8 +13,16 @@ library(data.table)
 # m = mainTreeFilename.txt or .rds                                             This sets the location of the maintrees file
 # l = <min.sp value>                                                           This sets the min.sp value to be used in the correlation. 
 
+#When running on the command line, note that the arguments should be formatted as:
+#r=Prefix v=forceUpdateValue etc
+#Rather than being in quotes and separated by commas. 
+#Terminal uses spaces to split indexes in a vector, where r uses indepent quotation and commas.
 
-args = c('r=ComplexDietCentralAnalysis', 'm=data/zoonomiaAllMammalsTrees.rds')
+
+args = c('r=ComplexDietCentralAnalysisSimplify2', 'm=data/zoonomiaAllMammalsTrees.rds')
+args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 'm=data/zoonomiaAllMammalsTrees.rds')
+args = c('r=ComplexDietCentralAnalysisSimplifyAltReconstruction', 'm=data/zoonomiaAllMammalsTrees.rds')
+
 
 # --- Standard start-up code ---
 if(clusterRun)args = commandArgs(trailingOnly = TRUE)
@@ -70,7 +78,7 @@ if(!is.na(cmdArgImport('l'))){
 # Make the merged phenotype
 #-------
 
-toMerge = c("Vertivore", "Insectivore")
+toMerge = c("Vertivore", "Insectivore", "Invertivore", "zMixedPredator")
 mergeValue = "Carnivore"
 
 

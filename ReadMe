@@ -10,18 +10,21 @@ RunMergedAnalysis.R
 ⌄
 EnrichmentAnalysisNew.R
 ⌄
-CategoricalCOmbinePairwiseResults.R
+CategoricalCombinePairwiseResults.R
 
 
 [permulations]
+
 CategoricalPermulations.R
 ⌄
-CateoricalPermualtionsCorrelation.R
+CategoricalPermulationsCorrelation.R
 ⌄
-CategoricalPermulationsCalculatePValue.R
+CateoricalPermulationsCalculatePValue.R
 
 
 [alternates]
+
+Src/runFullRERAndAlternate.sh
 
 
 ProcessAlternates.R

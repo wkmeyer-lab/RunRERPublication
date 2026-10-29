@@ -5,9 +5,6 @@ library(RERconverge)
 library(purrr)
 source("Src/Reu/cmdArgImport.R")
 
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=gene", "s=T", "l=F")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=KeggReactome", "s=T", "l=F")
-
 # -- Standard Startup code -- 
 if(clusterRun)args = commandArgs(trailingOnly = TRUE)
 {  # Bracket used for collapsing purposes

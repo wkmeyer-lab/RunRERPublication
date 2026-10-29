@@ -4,15 +4,32 @@ if(clusterRun){.libPaths("/share/ceph/wym219group/shared/libraries/R4")} #add pa
 library(RERconverge)
 source("Src/Reu/cmdArgImport.R")
 
+args = c("r=ComplexDietCentralAnalysisSimplify2", "g=gene", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplify2", "g=KeggReactome", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+
+args = c("r=ComplexDietCentralAnalysisSimplify2", "g=MGI_Mammalian_Phenotype_Level_4", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplify2", "g=GO_Biological_Process_2023", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplify2", "g=EnrichmentHsSymbolsFile2", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplify2", "g=tissue_specific", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
 
 
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=gene", "s=T", "l=A")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=KeggReactome", "s=T", "l=A")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=EnrichmentHsSymbolsFile2", "s=T", "l=F")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=DisGeNET", "s=T", "l=F")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=GO_Biological_Process_2023", "s=T", "l=F")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=MGI_Mammalian_Phenotype_Level_4", "s=T", "l=F")
-args = c("r=ComplexDietCentralAnalysis", "p=NULL", "g=tissue_specific", "s=T", "l=F")
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=gene", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=KeggReactome", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=MGI_Mammalian_Phenotype_Level_4", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=GO_Biological_Process_2023", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=EnrichmentHsSymbolsFile2", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=tissue_specific", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+
+
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=gene", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=KeggReactome", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=MGI_Mammalian_Phenotype_Level_4", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=GO_Biological_Process_2023", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=EnrichmentHsSymbolsFile2", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=tissue_specific", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+
 
 # -- Standard Startup code -- 
 if(clusterRun)args = commandArgs(trailingOnly = TRUE)
@@ -50,6 +67,7 @@ if(clusterRun)args = commandArgs(trailingOnly = TRUE)
 # Defaults
 significanceCutoff = 0.05
 pairwiseSets = c("Herbivore-Insectivore", "Herbivore-Vertivore", "Carnivore-Herbivore", "Herbivore-Omnivore", "Insectivore-Vertivore", "Omnivore-Vertivore", "Invertivore-Omnivore")
+pairwiseSets = c("Herbivore-Invertivore", "Herbivore-Vertivore", "Carnivore-Herbivore", "Herbivore-Omnivore", "Invertivore-Vertivore", "Omnivore-Vertivore", "Invertivore-Omnivore")
 geneSet = NULL
 usingGo = F
 saveData = T
@@ -57,22 +75,23 @@ usingGene = T
 saveCombinedData = T
 usePermulations = F
 addPermulations = F
-
+useOverlap =F
+useDelta = F
 
 { # Bracket used for collapsing purposes
   
   #pairwise Sets
-  if(!is.na(cmdArgImport('p'))){
-    pairwiseSets = cmdArgImport('p')
+  if(!all(is.na(cmdArgImport('p')))){
+    if(all(cmdArgImport('p') == "NULL")){
+      folderNames = basename(list.dirs(outputFolderName, full.names = TRUE, recursive = FALSE))
+      pairwiseSets = folderNames[grep("-", folderNames)]
+    }else{
+      pairwiseSets = cmdArgImport('p') 
+    }
   }else{
     folderNames = basename(list.dirs(outputFolderName, full.names = TRUE, recursive = FALSE))
     pairwiseSets = folderNames[grep("-", folderNames)]
     message("Folders not specified, using all folders. Note that if driver analysis is active, this may cause issues.")
-  }
-  if(is.null(pairwiseSets) | pairwiseSets == "NULL"){
-    folderNames = basename(list.dirs(outputFolderName, full.names = TRUE, recursive = FALSE))
-    pairwiseSets = folderNames[grep("-", folderNames)]
-    message("Null Folders specified, using all folders.")
   }
   
   #geneset
@@ -216,32 +235,54 @@ if(usingGene){
   
   
   # -- Add overlap information -- 
-
-  #Permualted
-  if(usePermulations & !addPermulations){
-    permSignificanceColumns = names(combinedResults)[grep("permSignificant", names(combinedResults))]
-    permGeneSignificanceResults = combinedResults[, names(combinedResults) %in% permSignificanceColumns]
-    
-    for(i in 2:length(permSignificanceColumns)){
-      combinations = combn(permSignificanceColumns, i, simplify = FALSE)
-      for(j in 1:length(combinations)){
-        currentCombination = combinations[[j]]
-        headers = gsub("-.*","",  currentCombination)
-        comboName = paste0(paste0(headers, collapse = "-"), "-PermOverlap")
-        
-        colsToCompare = permGeneSignificanceResults[,names(permGeneSignificanceResults) %in% currentCombination]
-        
-        comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-        which(comboValue)
-        combinedResults$newOverlapColumn = comboValue
-        names(combinedResults)[length(names(combinedResults))] = comboName
-        rm(colsToCompare)
+  if(useOverlap){
+    #Permualted
+    if(usePermulations & !addPermulations){
+      permSignificanceColumns = names(combinedResults)[grep("permSignificant", names(combinedResults))]
+      permGeneSignificanceResults = combinedResults[, names(combinedResults) %in% permSignificanceColumns]
+      
+      for(i in 2:length(permSignificanceColumns)){
+        combinations = combn(permSignificanceColumns, i, simplify = FALSE)
+        for(j in 1:length(combinations)){
+          currentCombination = combinations[[j]]
+          headers = gsub("-.*","",  currentCombination)
+          comboName = paste0(paste0(headers, collapse = "-"), "-PermOverlap")
+          
+          colsToCompare = permGeneSignificanceResults[,names(permGeneSignificanceResults) %in% currentCombination]
+          
+          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
+          which(comboValue)
+          combinedResults$newOverlapColumn = comboValue
+          names(combinedResults)[length(names(combinedResults))] = comboName
+          rm(colsToCompare)
+        }
+        rm(combinations)
       }
-      rm(combinations)
+      
+      #Unpermulated
+      significanceColumns = names(combinedResults)[grep("unpermSignificant", names(combinedResults))]
+      geneSignificanceResults = combinedResults[, names(combinedResults) %in% significanceColumns]
+      
+      for(i in 2:length(significanceColumns)){
+        combinations = combn(significanceColumns, i, simplify = FALSE)
+        for(j in 1:length(combinations)){
+          currentCombination = combinations[[j]]
+          headers = gsub("-.*","",  currentCombination)
+          comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
+          
+          colsToCompare = geneSignificanceResults[,names(geneSignificanceResults) %in% currentCombination]
+          
+          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
+          which(comboValue)
+          combinedResults$newOverlapColumn = comboValue
+          names(combinedResults)[length(names(combinedResults))] = comboName
+          rm(colsToCompare)
+        }
+      }
     }
-    
+      
     #Unpermulated
-    significanceColumns = names(combinedResults)[grep("unpermSignificant", names(combinedResults))]
+    significanceColumns = names(combinedResults)[grep("significant", names(combinedResults))]
     geneSignificanceResults = combinedResults[, names(combinedResults) %in% significanceColumns]
     
     for(i in 2:length(significanceColumns)){
@@ -259,55 +300,34 @@ if(usingGene){
         names(combinedResults)[length(names(combinedResults))] = comboName
         rm(colsToCompare)
       }
+      rm(combinations)
     }
   }
-    
-  #Unpermulated
-  significanceColumns = names(combinedResults)[grep("significant", names(combinedResults))]
-  geneSignificanceResults = combinedResults[, names(combinedResults) %in% significanceColumns]
-  
-  for(i in 2:length(significanceColumns)){
-    combinations = combn(significanceColumns, i, simplify = FALSE)
-    for(j in 1:length(combinations)){
-      currentCombination = combinations[[j]]
-      headers = gsub("-.*","",  currentCombination)
-      comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
-      
-      colsToCompare = geneSignificanceResults[,names(geneSignificanceResults) %in% currentCombination]
-      
-      comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-      which(comboValue)
-      combinedResults$newOverlapColumn = comboValue
-      names(combinedResults)[length(names(combinedResults))] = comboName
-      rm(colsToCompare)
-    }
-    rm(combinations)
-  }
-  
   # -- Add Delta information -- 
-  rhoColumns = names(combinedResults)[grep("-Rho", names(combinedResults))]
-  geneRhoColumns = combinedResults[, names(combinedResults) %in% rhoColumns]
-  for(i in 2:length(rhoColumns)){
-    combinations = combn(rhoColumns, i, simplify = FALSE)
-    for(j in 1:length(combinations)){
-      currentCombination = combinations[[j]]
-      if(length(currentCombination) > 2){next}
-      headers = gsub("-.*","",  currentCombination)
-      comboName = paste0(paste0(headers, collapse = "-"), "-Delta")
-      
-      colsToCompare = geneRhoColumns[,names(geneRhoColumns) %in% currentCombination]
-      
-      deltaValue = abs(colsToCompare[1] - colsToCompare[2]) / sqrt(2)
-      
-      
-      
-      combinedResults$newDeltaColumn = deltaValue[,1]
-      names(combinedResults)[length(names(combinedResults))] = comboName
-      rm(colsToCompare)
+  if(useDelta){
+    rhoColumns = names(combinedResults)[grep("-Rho", names(combinedResults))]
+    geneRhoColumns = combinedResults[, names(combinedResults) %in% rhoColumns]
+    for(i in 2:length(rhoColumns)){
+      combinations = combn(rhoColumns, i, simplify = FALSE)
+      for(j in 1:length(combinations)){
+        currentCombination = combinations[[j]]
+        if(length(currentCombination) > 2){next}
+        headers = gsub("-.*","",  currentCombination)
+        comboName = paste0(paste0(headers, collapse = "-"), "-Delta")
+        
+        colsToCompare = geneRhoColumns[,names(geneRhoColumns) %in% currentCombination]
+        
+        deltaValue = abs(colsToCompare[1] - colsToCompare[2]) / sqrt(2)
+        
+        
+        
+        combinedResults$newDeltaColumn = deltaValue[,1]
+        names(combinedResults)[length(names(combinedResults))] = comboName
+        rm(colsToCompare)
+      }
+      rm(combinations)
     }
-    rm(combinations)
   }
-  
   # -- save combination -- 
   if(saveData){
     combinedDataFilename = paste0(outputFolderName, filePrefix, "combinedGeneResults")
@@ -327,6 +347,8 @@ if(usingGo){
     
     goFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet,"Enrichment-", geneSet, ".rds")
     currentGoData = readRDS(goFilename)[[1]]
+
+    
     
     if(usePermulations){
       if(exists(currentGoData$permP.adj)){
@@ -370,44 +392,87 @@ if(usingGo){
   rm(currentGoData)
   
   GoCombinedResults = NA
+  longestGOResult = which(sapply(GOResults, nrow) == max(sapply(GOResults, nrow)))[1]
   for(i in 1:length(GOResults)){
-    if(all(rownames(GOResults[[1]]) == rownames(GOResults[[i]]))){
+    if(all(rownames(GOResults[[longestGOResult]]) == rownames(GOResults[[i]]))){
       cat("Combining GO Data", i, "\n")
       GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
     }else{
-      stop("Rownames of GO results are not the same, there is an issue with the GO data.")
+      tryCatch({
+        cat("Mismatch in order; reordering current data to first data; Combining GO Data", i, "\n")
+        
+        which(!rownames(GOResults[[longestGOResult]]) %in% rownames(GOResults[[i]]))
+        
+        matchedOrder = match(rownames(GOResults[[longestGOResult]]), rownames(GOResults[[i]]))
+        #matchedOrder = matchedOrder[-which(is.na(matchedOrder))]
+        GOResults[[i]] = GOResults[[i]][matchedOrder,]
+        GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
+      },error = function(e){      
+        stop("Rownames of GO results are not the same and cannot be reordered, there is an issue with the GO data.")
+        }
+
+      )
+
+      
+      
+      
+      
+      
     }
   }
   GoCombinedResults = GoCombinedResults[,-1]
   rm(GOResults)
   
   # -- Add overlap information -- 
-  
-  if(usePermulations & !addPermulations){
-    #Permulated
-    permGoSignificanceColumns = names(GoCombinedResults)[grep("PermSignificant", names(GoCombinedResults))]
-    permGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% permGoSignificanceColumns]
-    
-    for(i in 2:length(permGoSignificanceColumns)){
-      combinations = combn(permGoSignificanceColumns, i, simplify = FALSE)
-      for(j in 1:length(combinations)){
-        currentCombination = combinations[[j]]
-        headers = gsub("-.*","",  currentCombination)
-        comboName = paste0(paste0(headers, collapse = "-"), "-PermOverlap")
-        
-        colsToCompare = permGoSignificanceResults[,names(permGoSignificanceResults) %in% currentCombination]
-        
-        comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-        which(comboValue)
-        GoCombinedResults$newOverlapColumn = comboValue
-        names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
-        rm(colsToCompare)
+  if(useOverlap){
+    if(usePermulations & !addPermulations){
+      #Permulated
+      permGoSignificanceColumns = names(GoCombinedResults)[grep("PermSignificant", names(GoCombinedResults))]
+      permGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% permGoSignificanceColumns]
+      
+      for(i in 2:length(permGoSignificanceColumns)){
+        combinations = combn(permGoSignificanceColumns, i, simplify = FALSE)
+        for(j in 1:length(combinations)){
+          currentCombination = combinations[[j]]
+          headers = gsub("-.*","",  currentCombination)
+          comboName = paste0(paste0(headers, collapse = "-"), "-PermOverlap")
+          
+          colsToCompare = permGoSignificanceResults[,names(permGoSignificanceResults) %in% currentCombination]
+          
+          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
+          which(comboValue)
+          GoCombinedResults$newOverlapColumn = comboValue
+          names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
+          rm(colsToCompare)
+        }
+        rm(combinations)
       }
-      rm(combinations)
+      
+      #unpermulated
+      unpermGoSignificanceColumns = names(GoCombinedResults)[grep("unpermSignificant", names(GoCombinedResults))]
+      unpermGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% unpermGoSignificanceColumns]
+      
+      for(i in 2:length(unpermGoSignificanceColumns)){
+        combinations = combn(unpermGoSignificanceColumns, i, simplify = FALSE)
+        for(j in 1:length(combinations)){
+          currentCombination = combinations[[j]]
+          headers = gsub("-.*","",  currentCombination)
+          comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
+          
+          colsToCompare = unpermGoSignificanceResults[,names(unpermGoSignificanceResults) %in% currentCombination]
+          
+          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
+          which(comboValue)
+          GoCombinedResults$newOverlapColumn = comboValue
+          names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
+          rm(colsToCompare)
+        }
+        rm(combinations)
+      }
     }
     
     #unpermulated
-    unpermGoSignificanceColumns = names(GoCombinedResults)[grep("unpermSignificant", names(GoCombinedResults))]
+    unpermGoSignificanceColumns = names(GoCombinedResults)[grep("significant", names(GoCombinedResults))]
     unpermGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% unpermGoSignificanceColumns]
     
     for(i in 2:length(unpermGoSignificanceColumns)){
@@ -428,29 +493,6 @@ if(usingGo){
       rm(combinations)
     }
   }
-  
-  #unpermulated
-  unpermGoSignificanceColumns = names(GoCombinedResults)[grep("significant", names(GoCombinedResults))]
-  unpermGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% unpermGoSignificanceColumns]
-  
-  for(i in 2:length(unpermGoSignificanceColumns)){
-    combinations = combn(unpermGoSignificanceColumns, i, simplify = FALSE)
-    for(j in 1:length(combinations)){
-      currentCombination = combinations[[j]]
-      headers = gsub("-.*","",  currentCombination)
-      comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
-      
-      colsToCompare = unpermGoSignificanceResults[,names(unpermGoSignificanceResults) %in% currentCombination]
-      
-      comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-      which(comboValue)
-      GoCombinedResults$newOverlapColumn = comboValue
-      names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
-      rm(colsToCompare)
-    }
-    rm(combinations)
-  }
-  
   if(saveCombinedData){
     combinedGODataFilename = paste0(outputFolderName, filePrefix, "combinedGOResults-", geneSet)
     write.csv(GoCombinedResults, paste0(combinedGODataFilename, ".csv"))

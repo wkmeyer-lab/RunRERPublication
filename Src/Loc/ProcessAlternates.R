@@ -12,6 +12,12 @@ library(data.table)
 # This script can be used to run RER calculations and phenotype correlations with Binary, continuous, or categorical phenotypes.
 # It inputs a phenotype tree made by the appropriate script for the style, and outputs an RER file, a Paths file, and a Correlation file. 
 
+#When running on the command line, note that the arguments should be formatted as:
+#r=Prefix v=forceUpdateValue etc
+#Rather than being in quotes and separated by commas. 
+#Terminal uses spaces to split indexes in a vector, where r uses indepent quotation and commas.
+
+
 # -- Command arguments list
 # r = filePrefix                                                               This is a prefix used to organize and separate files by analysis run. Always required. 
 # v = <T or F>                                                                 This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
@@ -22,7 +28,8 @@ library(data.table)
 #----------------
 
 args = c('r=ComplexDietCentralAnalysis', 's=g', 'm=Data/zoonomiaAllMammalsTrees.rds', 'l=170', 'i=1')
-
+args = c('r=ComplexDietCentralAnalysisSimplify', 's=g', 'm=Data/zoonomiaAllMammalsTrees.rds', 'l=170', 'i=11')
+args = c('r=ComplexDietCentralAnalysisSimplifyStrictPred', 's=g', 'm=Data/zoonomiaAllMammalsTrees.rds', 'l=170', 'i=7')
 
 
 # --- Standard start-up code ---
@@ -127,7 +134,9 @@ if(!alternatesSpecified){
   usedAlternates = 1:length(alternateSets)
 }
 
+usedAlternates = as.integer(usedAlternates)
 for(i in usedAlternates){
+  message(i)
   currentSet = alternateSets[[i]]
   alternateFilePrefix = paste0("/Alternates/Alternate", i)
   filePrefix = paste0("Alternate", i, primaryFilePrefix)
@@ -180,6 +189,13 @@ for(i in usedAlternates){
     pathsObject = readRDS(pathsFileName)                                          #If the file already exists, use the existing one.
   }
   
+  
+  # --- ensure that the species filter and the alternate set match 
+  alternateInFilter = all(currentSet %in% speciesFilter)
+  filterInAlternate = all(speciesFilter %in% currentSet)
+  if(!alternateInFilter & filterInAlternate){
+    stop("Species filter and alterate set do not match. Aborting.")
+  }
   
   # --- CORRELATION ---
   correlationFileName = paste(outputFolderName, filePrefix, "CorrelationFile", sep= "") #Make a correlation filename based on the prefix
@@ -252,7 +268,7 @@ for(i in usedAlternates){
   # Make the merged phenotype
   #-------
   
-  toMerge = c("Vertivore", "Insectivore")
+  toMerge = c("Vertivore", "Insectivore", "Invertivore", "zMixedPredator")
   mergeValue = "Carnivore"
   
   

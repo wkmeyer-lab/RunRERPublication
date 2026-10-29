@@ -26,7 +26,36 @@ source("Src/Reu/ZoonomTreeNameToCommon.R")
 
 
 #----------------
+args = c('r=MaturityLifespanPercent', 'm=data/newHillerMainTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=MaturityPercentage','v=T')
+args = c('r=MaturityLogRaw', 'm=data/newHillerMainTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=logCombinedMaturity','v=T', 'n=FaName')
+args = c('r=PankajBodysize', 'm=data/newHillerMainTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=combinedBodysize','v=T', 'n=FaName')
 
+args = c('r=meanTemp', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=panTheriaTemperature','v=T', 'n=ZoonomiaTip')
+
+args = c('r=ContinousCdcaInv', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Inv','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaVend', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Vend','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaVect', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Vect','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaVfish', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Vfish','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaVunk', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Vunk','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaScav', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Scav','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaFruit', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Fruit','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaNect', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Nect','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaSeed', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.Seed','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaPlantO', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=Diet.PlantO','v=F', 'n=ZoonomiaTip')
+
+args = c('r=ContinousCdcaCp', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=cp','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaEe', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=ee','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaCf', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=cf','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaAsh', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=ash','v=F', 'n=ZoonomiaTip')
+args = c('r=ContinousCdcaNfe', 'm=data/zoonomiaAllMammalsTrees.rds', 'a=nfe','v=F', 'n=ZoonomiaTip')
+
+args = c('r=ContinousMaxAge', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/MaturityLifespanData.csv', 'a=MaximumAge','v=F', 'n=ZoonomiaTip')
+
+args = c('r=HarshalContinousRER', 'm=Data/HarshalFakeMainTrees.rds', 
+         'd=Data/VGP_ALDH1A1_Accession.csv', 
+         'n=Accession',
+         'a=ALDH1A1',
+         'v=T', 't=ER', 'l=T')
 
 # --- Standard start-up code ---
 if(clusterRun)args = commandArgs(trailingOnly = TRUE)

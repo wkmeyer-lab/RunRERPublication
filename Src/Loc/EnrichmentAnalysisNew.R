@@ -11,6 +11,12 @@ if(!clusterRun){library(xlsx)}
 # -- Usage:
 # This script is used to generate enrichment values from a correlation file. Can include permulation p values if provided. 
 
+#When running on the command line, note that the arguments should be formatted as:
+#r=Prefix v=forceUpdateValue etc
+#Rather than being in quotes and separated by commas. 
+#Terminal uses spaces to split indexes in a vector, where r uses indepent quotation and commas.
+
+
 # -- Command arguments list
 # r = filePrefix                            This is a prefix used to organize and separate files by analysis run. Always required. 
 # v = <T or F>                              This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
@@ -21,16 +27,19 @@ if(!clusterRun){library(xlsx)}
 # f = "permulationPvalueFileLocation.rds"   This is a manual override to specify the script use a specific Permulation p-value file.
     #If using any file other than "CombinedPrunedFastAll" with no run instance number, it must be specified manually.
 #----------------
+#'m=c("Data/tissue_specific.gmt", "Data/GSEA-c5-HsSymbols.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")'
+#'m=c("Data/DisGeNET.gmt", "Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt")'
 
 
-args = c('r=ComplexDietCentralAnalysis', 'm=c("Data/KeggReactome.gmt")', 'p=C', 's=c("Insectivore-Vertivore", "Herbivore-Vertivore", "Insectivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Insectivore", "Overall")' )
 
-args = c('r=CladeBinaryBovidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
-args = c('r=CladeBinaryCervidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
-args = c('r=CladeBinaryCricetidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
-args = c('r=CladeBinaryHystricognathi', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
-args = c('r=CladeBinaryPeropdidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
-args = c('r=CladeBinaryVespertilionidae', 'm=c("Data/KeggReactome.gmt")', 'p=F', 's=c("0-1")' )
+args = c('r=ComplexDietCentralAnalysisSimplify2', 'm=c("Data/KeggReactome.gmt"")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
+args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 'm=c("Data/KeggReactome.gmt"")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
+args = c('r=ComplexDietCentralAnalysisSimplifyAltReconstruction', 'm=c("Data/KeggReactome.gmt"")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
+
+
+args = c('r=ComplexDietCentralAnalysisSimplify2', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
+args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
+args = c('r=ComplexDietCentralAnalysisSimplifyAltReconstruction', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
 
 
 # --- Standard start-up code ---
@@ -123,11 +132,23 @@ subdirectoryValueList = NULL
     useSubdirectory = TRUE
     subdirectoryValueList = cmdArgImport('s')
     #message(paste("Using subdirectory", subdirectoryValue, "."))
-    
     if(length(subdirectoryValueList ==1)){outputFolderName = paste(outputFolderName, subdirectoryValueList[1], "/", sep=""); subdirectoryValue = subdirectoryValueList[1]}
     
   }else{
     message("No subdirectory specified.")
+    
+    
+    folderNames = basename(list.dirs(outputFolderName, full.names = TRUE, recursive = FALSE))
+    if(length(folderNames) >0 ){
+      useSubdirectory = TRUE
+      subdirectoryValueList = folderNames
+      subdirectoryValueList = subdirectoryValueList[!(subdirectoryValueList == "Alternates")]
+      message("Folders not specified, using all folders but Alternates. Note that if driver analysis is active, this may cause issues.")
+    }else{
+      message("Using main directory")
+    }
+    
+
   }
 }
 
@@ -154,7 +175,7 @@ for(i in 1:length(subdirectoryValueList)){
   if(usePermulations){                                                            #If permualtions are being used   
     if(useCategoricalPermulations){
         correlationData$P = correlationData$permP
-    }else{
+      }else{
       if(usePermulationPValOverride){                                               #check for a location override
         permulationFileLocation = paste(outputFolderName, permulationPValOverride, sep="")                           #if so, use it 
       }else{                                                                        #if not, use the default 
@@ -187,6 +208,9 @@ for(i in 1:length(subdirectoryValueList)){
   names(annotationsList) = enrichmentListName                                     #name geneset list with that name 
   
   enrichmentResult = fastwilcoxGMTall(rerStats, annotationsList, outputGeneVals = T, num.g =2) #run enrichment analysis 
+  
+  #This version run it on all of the genesets, regardless of the numebr f included genes; useful for order consistency. 
+  #enrichmentResult = fastwilcoxGMTall(rerStats, annotationsList, outputGeneVals = T, num.g =0) #run enrichment analysis 
   
   #save the enrichment output
   if(usePermulations == F){
@@ -248,4 +272,3 @@ for(i in 1:length(subdirectoryValueList)){
     }
   }
 }  
-

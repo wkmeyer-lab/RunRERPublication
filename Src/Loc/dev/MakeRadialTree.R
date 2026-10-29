@@ -26,6 +26,9 @@ args =c("r=LeahCategoricalRERNew", 'c=c("Herbivore", "Invertivore", "Omnivore", 
 args =c("r=PosterTreeNew", 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=SciencificName', "l=Diet", "i=T", "m=Data/LeahFakeMainTrees.rds", "d=Data/LeahPosterData.csv")
 
 
+args =c("r=ComplexDietCentralAnalysisSimplify2", 'c=c("Herbivore", "Invertivore", "Omnivore", "Vertivore")', 'n=ZoonomiaTip', "l=Diet", "i=F" )
+
+
 # -- Standard Startup code -- 
 {  # Bracket used for collapsing purposes
   #File Prefix
@@ -322,6 +325,7 @@ if(imageAllTips){
     collapsedClades$Noctilio = MRCA(commonCategoricalTree, c(151))
     collapsedClades$`Vampire Bat` = MRCA(commonCategoricalTree, c(147))
     collapsedClades$Phyllostomidae = MRCA(commonCategoricalTree, c(141,142,143,144))
+    #collapsedClades$Noctilionoidea = MRCA(commonCategoricalTree, c(141,142,143,144))
     collapsedClades$Horse = MRCA(commonCategoricalTree, c(102,100,101))
     collapsedClades$Pig = MRCA(commonCategoricalTree, c(97,98))
     collapsedClades$`bos bison` = MRCA(commonCategoricalTree, c(89,90,91))
@@ -341,12 +345,15 @@ if(imageAllTips){
   
   
   cladeUuids = NA
+  cladeByUuids = NA
   for(i in 1:length(names(collapsedClades))){
     message(i)
     autoName = autocomplete_name(names(collapsedClades)[i])[1,2]
     message(autoName)
     cladeUuids[i] = get_uuid(autoName)
+    cladeByUuids[i] = get_uuid(autoName, filter = "by")
   }
+  cladeUuids[which(!is.na(cladeByUuids))] = cladeByUuids
   
   
   clades = data.frame(
@@ -356,6 +363,8 @@ if(imageAllTips){
     phylopic = cladeUuids
     
   )
+  clades$cladelabel[which(!cladeUuids == cladeByUuids)]
+  clades$cladelabel[which(is.na(cladeByUuids))]
   
   clades$x_new = NA
   clades$y_new = NA
@@ -424,7 +433,7 @@ if(!imageAllTips){
 
 #output the tree
 treeOutputLocation = paste0(outputFolderName, filePrefix, "RadialDisplayTree.pdf")
-pdf(treeOutputLocation, width = 18, height = 20)
+pdf(treeOutputLocation, width = 9, height = 10)
 #ggTreeClades + rphylopic::geom_phylopic(data = ggTreeClades$data, aes(uuid = phylopic, x = x_new, y= y_new),size = 0.02)
 ggTreeClades + ggimage:: geom_phylopic(data = ggTreeClades$data, aes(image = phylopic, x = x_new, y= y_new),size = 0.02)
 ggTreeClades + geom_tiplab()+ theme(legend.position = "none")
@@ -434,7 +443,7 @@ treeOutputLocation = paste0(outputFolderName, filePrefix, "RadialDisplayTree.png
 png(treeOutputLocation, 1400, 1400)
 #ggTreeClades + rphylopic::geom_phylopic(data = ggTreeClades$data, aes(uuid = phylopic, x = x_new, y= y_new),size = 0.02)
 ggTreeClades + ggimage:: geom_phylopic(data = ggTreeClades$data, aes(image = phylopic, x = x_new, y= y_new),size = 0.02)
-ggTreeClades + geom_tiplab()
+#ggTreeClades + geom_tiplab() + theme(legend.position = "none")
 dev.off()
 
 

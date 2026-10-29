@@ -72,6 +72,20 @@ args = c("r=ComplexDietCentralAnalysis",
          "d=T",'l=c("H>P", "P>H")', 'z=50', 'a=T')
 
 
+args = c("r=ComplexDietCentralAnalysisSimplify2", 
+         'n=c("Herbivore-Invertivore", "Herbivore-Vertivore", "Carnivore-Herbivore")',
+         "d=T",'l=c("H>P", "P>H")', 'z=50', 'a=T')
+
+
+args = c("r=ComplexDietCentralAnalysisSimplify2", 
+         'n=c("Herbivore-Invertivore", "Herbivore-Vertivore", "Carnivore-Herbivore")',
+         "d=T",'l=c("H>P", "P>H")', 'z=50', 'a=T', 'g=KeggReactome')
+
+args = c("r=ComplexDietCentralAnalysisSimplify2", 
+         'n=c("Herbivore-Invertivore", "Herbivore-Vertivore", "Carnivore-Herbivore")',
+         "d=T",'l=c("H>P", "P>H")', 'z=50', 'a=T')
+
+
 {
 # -- Standard Startup code -- 
 if(clusterRun)args = commandArgs(trailingOnly = TRUE)
@@ -434,6 +448,7 @@ if(makeDirectional){
   
   if(usingGo){
     GoStatColumns = names(GoCombinedResults)[grep("stat", names(GoCombinedResults))]
+    GoStatColumns = GoStatColumns[which(nchar(GoStatColumns) ==7)]
     GoSignificanceResultsDirection = GoCombinedResults[, names(GoCombinedResults) %in% c(GoSignificanceColumns, GoStatColumns)]
     
     GoDirectionalSignificanceResults = makeDirectionalResults(GoSignificanceResultsDirection, GoStatColumns)
@@ -536,7 +551,13 @@ if(makeDirectional){
   }
   
   if(usingGo){
+    largerOfDirections = max(positiveResultsNumber, negativeResultsNumber)
+    totalResultsNumber = sum(apply(vennGeneSignificanceResults, 1, function(x) any(x == TRUE, na.rm = TRUE)))
+    totalRatio = totalResultsNumber/largerOfDirections
     allVenn = grid.arrange(geneVenn,goVenn, combinedDirectionVenn, nrow = 1, padding = unit(1, "line"))
+    grid.text("A", x = unit(0.02, "npc"), y = unit(0.98, "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
+    grid.text("B", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(0.98, "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
+    grid.text("C", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(1-(ratio/(ratio+1)), "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
     
     vennDiagramFilename = paste0(outputFolderName, filePrefix, "VennDiagram", geneSet, ".pdf")
     pdf(vennDiagramFilename, height = 12, width = 16)
@@ -559,19 +580,24 @@ if(makeDirectional){
     totalRatio = totalResultsNumber/largerOfDirections
     allVenn = grid.arrange(goVenn, combinedDirectionVenn, nrow = 1, padding = unit(1, "line"), widths = c(totalRatio, 1))
     
-    vennDiagramFilename = paste0(outputFolderName, filePrefix, "VennDiagram", geneSet, ".pdf")
+    vennDiagramFilename = paste0(outputFolderName, filePrefix, "GOVennDiagram", geneSet, ".pdf")
     pdf(vennDiagramFilename, height = 6, width = 6)
     plot(combinedVenn)
     dev.off()
     
-    vennDirectionalDiagramFilename = paste0(outputFolderName, filePrefix, "VennDirectionalDiagram", geneSet, ".pdf")
+    vennDirectionalDiagramFilename = paste0(outputFolderName, filePrefix, "GOVennDirectionalDiagram", geneSet, ".pdf")
     pdf(vennDirectionalDiagramFilename, height = 6, width = 6)
     plot(combinedDirectionVenn)
     dev.off()
     
-    vennCombinedDiagramFilename = paste0(outputFolderName, filePrefix, "VennCombinedDiagram", geneSet, ".pdf")
+    vennCombinedDiagramFilename = paste0(outputFolderName, filePrefix, "GOVennCombinedDiagram", geneSet, ".pdf")
     pdf(vennCombinedDiagramFilename, height = 12, width = 19.2)
+    vennCombinedDiagramFilename = paste0(outputFolderName, filePrefix, "GOVennCombinedDiagram", geneSet, ".png")
+    png(vennCombinedDiagramFilename, height = 12, width = 19.2, units = "in", res = 216)
     plot(allVenn)
+    grid.text("A", x = unit(0.02, "npc"), y = unit(0.99, "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
+    grid.text("B", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(0.99, "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
+    grid.text("C", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(1-(ratio/(ratio+1)), "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
     dev.off()
     
   }else{
@@ -581,7 +607,7 @@ if(makeDirectional){
     allVenn = grid.arrange(combinedVenn, combinedDirectionVenn, nrow = 1, padding = unit(1, "line"), widths = c(totalRatio, 1))
     grid.text("A", x = unit(0.02, "npc"), y = unit(0.98, "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
     grid.text("B", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(0.98, "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
-    grid.text("C", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(ratio/(ratio+1), "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
+    grid.text("C", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(1-(ratio/(ratio+1)), "npc"), just = c("left", "top"), gp = gpar(fontsize = 16, fontface = "bold"))
     
     
     vennDiagramFilename = paste0(outputFolderName, filePrefix, "VennDiagram", geneSet, ".pdf")
@@ -596,10 +622,12 @@ if(makeDirectional){
     
     vennCombinedDiagramFilename = paste0(outputFolderName, filePrefix, "VennCombinedDiagram", geneSet, ".pdf")
     pdf(vennCombinedDiagramFilename, height = 8, width = 13)
+    vennCombinedDiagramFilename = paste0(outputFolderName, filePrefix, "VennCombinedDiagram", geneSet, ".png")
+    png(vennCombinedDiagramFilename, height = 8, width = 13, units = "in", res = 216)
     plot(allVenn)
     grid.text("A", x = unit(0.02, "npc"), y = unit(0.99, "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
     grid.text("B", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(0.99, "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
-    grid.text("C", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(ratio/(ratio+1), "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
+    grid.text("C", x = unit(totalRatio/ (totalRatio +1), "npc"), y = unit(1-(ratio/(ratio+1)), "npc"), just = c("left", "top"), gp = gpar(fontsize = 24, fontface = "bold"))
     dev.off()
   }
   

@@ -12,6 +12,12 @@ library(data.table)
 # This script can be used to run RER calculations and phenotype correlations with Binary, continuous, or categorical phenotypes.
 # It inputs a phenotype tree made by the appropriate script for the style, and outputs an RER file, a Paths file, and a Correlation file. 
 
+#When running on the command line, note that the arguments should be formatted as:
+#r=Prefix v=forceUpdateValue etc
+#Rather than being in quotes and separated by commas. 
+#Terminal uses spaces to split indexes in a vector, where r uses indepent quotation and commas.
+
+
 # -- Command arguments list
 # r = filePrefix                                                               REQUIRED: This is a prefix used to organize and separate files by analysis run. Always required. 
 # m = mainTreeFilename.txt or .rds                                             REQUIRED: This sets the location of the maintrees file
@@ -25,8 +31,17 @@ library(data.table)
 
 #----------------
 
-args = c("r=ComplexDietCentralAnalysis", 'm=zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=CladeBinaryBovidae", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=CladeBinaryCervidae", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=CladeBinaryCricetidae", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=CladeBinaryHystricognathi", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=CladeBinaryVespertilionidae", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=CladeBinaryPeropdidae", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
 
+
+args = c("r=ComplexDietCentralAnalysisSimplify2", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
+args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", 'm=data/zoonomiaAllMammalsTrees.rds', "s=g", "v=F", "l=170")
 
 # --- Standard start-up code ---
 if(clusterRun)args = commandArgs(trailingOnly = TRUE)
