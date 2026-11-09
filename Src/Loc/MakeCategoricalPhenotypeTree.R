@@ -17,171 +17,31 @@ source("Src/Reu/ZoonomTreeNameToCommon.R")
 
 
 # -- Command arguments list
+# - required -
 # r = filePrefix                                         This is a prefix used to organize and separate files by analysis run. Always required. 
 # v = <T or F>                                           This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
 # m = mainTreeFilename.txt or .rds                       This sets the location of the maintrees file
 # d = spreadSheetFilename.csv                            This sets the spreadsheet to read the data from 
-# a = "annotCollumn"                                     This is the column in the manual annotations spreadsheet to use
+# a = "annotCollumn"                                     This is the column with the phenotype information
 # n = "nameColumn"                                       This sets the column with the tip names as they appear in the maintrees file. 
-# c = <c("nameOfCategory1,"nameOfCategory2")>            This is the list of category names 
+# c = <c("nameOfCategory1,"nameOfCategory2")>            This is the list of category names, include ALL categories to be included (even those merged later)
+# - optional - 
 # u = list(c("replace1", "with1"),c("replace2, with2"))
 # o = list(c("phenotype1", "intophen1"), c("2", "i2"))   This causes combination phenotypes to be merged into the second phenotype, but does not replace standalone phenotypes
 # s = "screenCollumn"                                    This is a collumn which must have a value of 1 for the species to be included. 
 # t = <ER or SYM or ARD>                                 This sets the model type used to estimate ancestral branches 
 # g = "ancestralTrait"                                   This can be used to set all non-terminal branches to this category. Use be one of the categories in the list. 
+# b = c( "colors", "in ","the", "palette")               This sets the color palette used in the tree graphs. 
+# - pruning - 
 # z = <minimum branch length>                            This sets the minimum branch length for terminal branches in the master tree. Branches shorter than this will be removed. 
 # x = "pruningPrefrenceColumn"                           This sets a column, where if the value is 1, the tip will be preferentially kept. If the value is TRUE, the tip will never be pruned.
 # y = "c('unprunedtip1', 'unprunedtip2')"                This allows you to add a list of specific tips to not be dropped during pruning. Must use the tip name, not common name. 
 # p = "c('prunedtip1', 'prunedtip2')"                    This allows you to manually specify additional branches to be pruned
 # l = <T or F>                                           DO NOT USE UNLESS SPECIFIED -- This determines if the liam infrence nodes should be added 
 # e = <T or F>                                           This sets if alternate species sets should be created. 
+
 #----------------
 
-{
-  args = c('r=CladeBinaryBovidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isBovidae','s=isInAnalysisWithFullFamilies') 
-  args = c('r=CladeBinaryCervidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isCervidae','s=isInAnalysisWithFullFamilies') 
-  args = c('r=CladeBinaryCricetidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isCricetidae','s=isInAnalysisWithFullFamilies') 
-  args = c('r=CladeBinaryHystricognathi', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isHystricognathi','s=isInAnalysisWithFullFamilies') 
-  args = c('r=CladeBinaryVespertilionidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isVespertilionidae','s=isInAnalysisWithFullFamilies') 
-  args = c('r=CladeBinaryPeropdidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isPeropdidae','s=isInAnalysisWithFullFamilies') 
-  args = c('r=CladeBinaryPeropdidae', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=F', 'e=T',
-           'c=c(0, 1)',
-           'a=isCervidae','s=isInAnalysisWithFullFamilies') 
-}
-{ 
-  args = c('r=ComplexDietCentralAnalysisSimplifyAllSpecies', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=SimplifiedDietConvert', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=T',
-           'c=c(
-              "Vertivore", "Omnivore", "Herbivore", "Invertivore"
-            )'
-           )
-  
-  args = c('r=ComplexDietCentralAnalysisSimplify2', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=SimplifiedDietConvert', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01', 'l=T', 'e=T',
-           'c=c(
-              "Vertivore", "Omnivore", "Herbivore", "Invertivore"
-            )', 
-           'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1",  "PreserveMonotremeBranches",
-          "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", "MarsupialTransitionPreservation",
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", "AfrotheriaPreserveTransitions",
-          "vs_HLursThi1", "vs_ursMar1", "vs_HLursArc1", "vs_HLailMel2", "UrsaPreserveTransition",
-          "vs_lepWed1", "vs_HLmirAng2", "vs_HLphoVit1", "vs_HLeriBar1", "SealPreserveTransitions",
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", "SealSeaLionPreserveTransitions",
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", "MustelidPreserveTransitions",
-          "vs_HLlycPic2", "CanidPreserveTransision",
-          "vs_HLgloMel1", "vs_HLpepEle1", "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast","vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", "CetaceaPreserveTransitions",
-          "vs_HLmerUng1", "BankVoleTransition",
-          "vs_HLeulMon1", "vs_HLeulFul1", "LemurTransition",
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", "PrimateTransitionsContinued",
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", "PrimateTransitionsContinuedAgain",
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", "Drilltransitions",
-          "vs_HLmarFla1", "marmotClade", "DoormouseTransition",
-          "vs_eulMac1", "vs_ponAbe3", "PrimateTransitions"
-          
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-  
-  args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePredAllSpecies', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=SimplifiedDietConvertStrictPred', 'v=T', 't=ER', 'n=ZoonomiaTip', 'l=T', 'e=T',
-           'c=c(
-              "Vertivore", "Omnivore", "Herbivore", "Invertivore"
-            )')
-  args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=SimplifiedDietConvertStrictPred', 'v=T', 't=ER', 'n=ZoonomiaTip', 'z=0.01', 'l=T', 'e=T',
-           'c=c(
-              "Vertivore", "Omnivore", "Herbivore", "Invertivore"
-            )', 
-           'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1",  "PreserveMonotremeBranches",
-          "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", "MarsupialTransitionPreservation",
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", "AfrotheriaPreserveTransitions",
-          "vs_HLursThi1", "vs_ursMar1", "vs_HLursArc1", "vs_HLailMel2", "UrsaPreserveTransition",
-          "vs_lepWed1", "vs_HLmirAng2", "vs_HLphoVit1", "vs_HLeriBar1", "SealPreserveTransitions",
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", "SealSeaLionPreserveTransitions",
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", "MustelidPreserveTransitions",
-          "vs_HLlycPic2", "CanidPreserveTransision",
-          "vs_HLgloMel1", "vs_HLpepEle1", "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast","vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", "CetaceaPreserveTransitions",
-          "vs_HLmerUng1", "BankVoleTransition",
-          "vs_HLeulMon1", "vs_HLeulFul1", "LemurTransition",
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", "PrimateTransitionsContinued",
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", "PrimateTransitionsContinuedAgain",
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", "Drilltransitions",
-          "vs_HLmarFla1", "marmotClade", "DoormouseTransition",
-          "vs_eulMac1", "vs_ponAbe3", "PrimateTransitions"
-          
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-  
-  args = c('r=ComplexDietCentralAnalysisSimplifyAltReconstruction', 'm=data/zoonomiaAllMammalsTrees.rds', 'd=Data/mergedData.csv', 'a=SimplifiedDietConvert', 'v=F', 't=ER', 'n=ZoonomiaTip', 'z=0.01', 'l=F', 'e=T',
-           'c=c(
-              "Vertivore", "Omnivore", "Herbivore", "Invertivore"
-            )', 
-           'y=c(
-          "vs_HLornAna3", "vs_HLtacAcu1",  "PreserveMonotremeBranches",
-          "vs_HLdidVir1", "vs_HLgymLea1", "vs_HLpseCup1", "MarsupialTransitionPreservation",
-          "vs_HLmyrTri1", "vs_HLchoDid1", "vs_HLchoHof3", "vs_HLproCap3", "AfrotheriaPreserveTransitions",
-          "vs_HLursThi1", "vs_ursMar1", "vs_HLursArc1", "vs_HLailMel2", "UrsaPreserveTransition",
-          "vs_lepWed1", "vs_HLmirAng2", "vs_HLphoVit1", "vs_HLeriBar1", "SealPreserveTransitions",
-          "vs_HLodoRos1", "vs_HLcalUrs1", "vs_HLzalCal1", "SealSeaLionPreserveTransitions",
-          "vs_HLmelCap1", "vs_HLgulGul1", "vs_HLneoVis1", "MustelidPreserveTransitions",
-          "vs_HLlycPic2", "CanidPreserveTransision",
-          "vs_HLgloMel1", "vs_HLpepEle1", "vs_HLturAdu1", "DolphinClade", "vs_orcOrc1", "vs_HLescRob1", "vs_HLlniGeo1", "amazonRiverDolphinFromYeast","vs_HLbalEde1", "vs_HLmegNov1", "vs_HLcynGun1", "CetaceaPreserveTransitions",
-          "vs_HLmerUng1", "BankVoleTransition",
-          "vs_HLeulMon1", "vs_HLeulFul1", "LemurTransition",
-          "vs_panTro6", "vs_HLrhiRox2", "LangurClade", "vs_HLallNig1", "PrimateTransitionsContinued",
-          "vs_HLeryPat1", "vs_chlSab2", "geunonClade", "vs_HLtheGel1", "PrimateTransitionsContinuedAgain",
-          "vs_HLpapAnu5", "vs_HLmanSph1", "DrillMandrillClade", "vs_cerAty1", "Drilltransitions",
-          "vs_HLmarFla1", "marmotClade", "DoormouseTransition",
-          "vs_eulMac1", "vs_ponAbe3", "PrimateTransitions"
-          
-         )',
-         'p=c(
-          "vs_HLellTal1", "vs_HLellLut1", "vs_HLarvAmp1", "voleClade",
-          "vs_HLhysCri1", "vs_HLthrSwi1", "vs_HLpetTyp1", "vs_hetGla2", "vs_chiLan1", "vs_HLdinBra1", "vs_HLcteSoc1", "vs_octDeg1", "vs_HLcoePre1", "vs_HLdasPun1", "vs_HLdolPat1", "gundiGuineaPigClade",
-          "vs_HLoryGaz1", "vs_HLbeaHun1", "vs_HLkobLecLec1", "vs_HLkobLecLec1", "vs_HLmadKir1", "vs_HLneoPyg1", "vs_HLphiMax1", "vs_HLoreOre1", "vs_HLneoMos1", "vs_HLaepMel1", "vs_HLtraImb1", "Bovidae",
-          "vs_HLhydIne1", "vs_HLmunMun1", "Cervidae",
-          "vs_HLmurAurFea1", "outerVespert",
-          "vs_HLmyoLuc1", "Nearctic",
-          "vs_myoDav1", "Myotis",
-          "vs_HLpipPip1", "vs_HLlasBor1", "vs_HLnycHum2", "Vespertilioninae",
-          "vs_HLmacSob1", "FoxLongTounge",
-          "vs_HLeidHel2", "outerPeropodidae",
-          "vs_HLeonSpe1", "Roussetinae"
-         )')
-}
 
 
 
@@ -241,6 +101,7 @@ pruningProtection = F
 manualPruningSpecies = NULL
 useLiam = F
 generateAlternates = F
+colorSet = c( "darkgreen", "darkblue","black", "red", "yellow")
 
   #MainTrees Location
   if(!is.na(cmdArgImport('m'))){
@@ -365,10 +226,18 @@ generateAlternates = F
     message("Not Generating Alternates.")
   }
 
+  #Color pallete
+  if(!all(is.na(cmdArgImport('b')))){
+    colorSet = cmdArgImport('b')
+    message("using specified colorset")
+  }else{
+    message("Using Default palette Generating Alternates.")
+  }
+
 
 }
 
-
+palette(colorSet)
 #                   ------- Code Body --------  
 
 manualAnnots = read.csv(spreadSheetLocation)                      #load the manual annotations file holding the phenotype data
@@ -548,8 +417,7 @@ if(!useLiam){
   
   # - Categorical Tree - 
   treeImageFilename = paste(outputFolderName, filePrefix, "CategoricalTree.pdf", sep="") #make a filename based on the prefix
-  palette(c( "darkgreen", "darkblue","black", "red", "yellow"))
-  
+
   pdf(treeImageFilename, height = length(phenotypeVector)/18, width = 10)                     #make a pdf to store the plot, sized based on tree size
   commonCategoricalTree = char2TreeCategorical(commonPhenotypeVector, commonMainTrees, commonSpeciesFilter, model = modelType, anctrait = ancestralTrait, plot = F)
   categoricalTree = char2TreeCategorical(phenotypeVector, mainTrees, speciesFilter, model = modelType, anctrait = ancestralTrait, plot = F) #use the phenotype vector to make a tree
@@ -569,11 +437,13 @@ if(!useLiam){
   #plotTreeCategorical(commonCategoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = commonMasterAdded)
   #plotTreeCategorical(categoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = masterTreeAdded)
   
-  plotTreeCategorical(commonCategoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = commonMainTrees$masterTree)
-  plotTreeCategorical(categoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = mainTrees$masterTree)
+  categoryLegend = names(table(phenotypeVector))
   
-  plotTreeCategorical(commonCategoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = commonMasterAdded)
-  plotTreeCategorical(categoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = masterTreeAdded)
+  plotTreeCategorical(commonCategoricalTree, categoryLegend, master = commonMainTrees$masterTree)
+  plotTreeCategorical(categoricalTree, categoryLegend, master = mainTrees$masterTree)
+  
+  plotTreeCategorical(commonCategoricalTreeExtraTip, categoryLegend, master = commonMasterAdded)
+  plotTreeCategorical(categoricalTreeExtraTip, categoryLegend, master = masterTreeAdded)
   dev.off()  
   
 }
@@ -917,9 +787,6 @@ if(generateAlternates){
   #Try to test for broken paths 
   alternateSets = readRDS(paste0(outputFolderName, filePrefix, "AlternatePruningSpecies.rds"))
   brokenPaths = integer()
-  if(!dir.exists(paste0(outputFolderName, "/Alternates/Broken"))){                                      #Make output directory if it does not exist
-    dir.create(paste0(outputFolderName, "/Alternates/Broken"))
-  }
   for(i in 1:length(alternateSets)){
     message(i)
     currentSet = alternateSets[[i]]
@@ -953,13 +820,20 @@ if(generateAlternates){
     }
   
   }
-  brokenAlternateSet = alternateSets[brokenPaths]
-  names(brokenAlternateSet) = brokenPaths
-  brokenAlternatesFilename = paste(outputFolderName, "Alternates/Broken/", filePrefix, "BrokenAlternateSets.rds", sep="")
-  saveRDS(brokenAlternateSet, brokenAlternatesFilename)
-  
-  backupAlternatesFilename = paste(outputFolderName, "Alternates/Broken/", filePrefix, "OriginalAlternateSets.rds", sep="")
-  saveRDS(alternateSets, backupAlternatesFilename)
+  if(length(brokenPaths) > 0){
+    if(!dir.exists(paste0(outputFolderName, "/Alternates/Broken"))){                                      #Make output directory if it does not exist
+      dir.create(paste0(outputFolderName, "/Alternates/Broken"))
+    }
+    
+    brokenAlternateSet = alternateSets[brokenPaths]
+    names(brokenAlternateSet) = brokenPaths
+    brokenAlternatesFilename = paste(outputFolderName, "Alternates/Broken/", filePrefix, "BrokenAlternateSets.rds", sep="")
+    saveRDS(brokenAlternateSet, brokenAlternatesFilename)
+    
+    backupAlternatesFilename = paste(outputFolderName, "Alternates/Broken/", filePrefix, "OriginalAlternateSets.rds", sep="")
+    saveRDS(alternateSets, backupAlternatesFilename)
+  }
+
   
   
   #Exit the script if being run automatically before making any changes 

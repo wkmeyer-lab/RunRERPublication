@@ -20,9 +20,11 @@ source("Src/Reu/cmdArgImport.R")
 
 
 #----------------
-#Run 650 of these
-args = c('r=ComplexDietCentralAnalysisSimplify2', 'i=$i', 'n=4000', 'l=10', 'm=Data/zoonomiaAllMammalsTrees.rds') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
+args = c('r=CategoricalDiet3Phen', 'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=F', 't=ER', 'n=20', 'i=Dev', 'l=0.1') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
 
+args = c('r=NewHiller4Phen', 'm=data/newHillerMainTrees.rds', 'v=F', 't=ER', 'n=4', 'i=Dev', 'l=0.1') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
+args = c('r=NewHiller4Phen', 'm=data/newHillerMainTrees.rds', 'v=F', 't=ER', 'n=4', 'i=Dev', 'l=0.1') #This is a debug argument set. It is used to set arguments locally, when not running the code through a bash script.
+args = c('r=CIvHBinaryZoonomia', 'm=data/RemadeTreesAllZoonomiaSpecies.rds', 'v=F', 't=ER', 'n=20', 'i=Dev')
 
 # --- Standard start-up code ---
 args = commandArgs(trailingOnly = TRUE)

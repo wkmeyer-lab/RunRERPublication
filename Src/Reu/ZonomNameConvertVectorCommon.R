@@ -2,7 +2,7 @@
 # Convert names of one type to another type based on two columns in a specified spreadsheet. 
 
 
-ZonomNameConvertVectorCommon = function(namesVector, toScientific = F, annotationLocation = "Data/mergedData.csv", scientificColumn = "ScientificName", commonColumn = "CommonName", tipColumn = "tipName"){
+ZonomNameConvertVectorCommon = function(namesVector, toScientific = F, annotationLocation = "Data/mergedData.csv", scientificColumn = c("ScientificName","ScientificNames", "ScientificNameFull", "Scientific Name Full", "Scientific Name", "Scientific Names", "scientificBinomial", "scientific Binomial", "scientificBinomials", "scientific Binomials"), commonColumn = c("CommonName", "CommonNames", "Common Name", "Common Names"), tipColumn = "tipName"){
   names = namesVector                                                    #make a vector of the names
   manualAnnot = read.csv(annotationLocation)                     #import manual annots file
   tipColumnNumber = which(names(manualAnnot) == tipColumn)
@@ -13,10 +13,10 @@ ZonomNameConvertVectorCommon = function(namesVector, toScientific = F, annotatio
     obsNumber = currentSize[1]                                                  #set "size" equal to the number of observations in 'currentRow'; which is the number of matches to the current name. If none exist it will be 0, if more than one it will be greater than 1. 
     if(obsNumber == 1){                                                         #if only one match exists:
       if(toScientific){
-        scientificColumnNumber = which(names(manualAnnot) == scientificColumn)
+        scientificColumnNumber = which(tolower(names(manualAnnot)) %in% tolower(scientificColumn))[1]
         currentName = currentRow[[scientificColumnNumber]]                            #get the name from that row
       }else{
-        commonColumnNumber = which(names(manualAnnot) == commonColumn)
+        commonColumnNumber = which(tolower(names(manualAnnot)) %in% tolower(commonColumn))[1]
         currentName = currentRow[[commonColumnNumber]]   
       }
     }else{

@@ -1,66 +1,57 @@
+#This script combines all of the pairwise comparisons, and the overall comparison, of a categorical RERConverge analysis into a single file. 
+#For the older version of the script which included overlap, detla, and driver analyses, see CategoricalCombinePairwiseResults-OLD.R
+
+
 clusterRun = F
 clusterRun = T
 if(clusterRun){.libPaths("/share/ceph/wym219group/shared/libraries/R4")} #add path to custom libraries to searched locations
 library(RERconverge)
 source("Src/Reu/cmdArgImport.R")
+source("Src/Reu/trimGmtFilenameToSetname.R")
 
-args = c("r=ComplexDietCentralAnalysisSimplify2", "g=gene", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplify2", "g=KeggReactome", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-
-args = c("r=ComplexDietCentralAnalysisSimplify2", "g=MGI_Mammalian_Phenotype_Level_4", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplify2", "g=GO_Biological_Process_2023", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplify2", "g=EnrichmentHsSymbolsFile2", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplify2", "g=tissue_specific", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-
-
-args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=gene", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=KeggReactome", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-
-args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=MGI_Mammalian_Phenotype_Level_4", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=GO_Biological_Process_2023", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=EnrichmentHsSymbolsFile2", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyExclusivePred", "g=tissue_specific", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+# -- Command arguments list
+# r = filePrefix                            This is a prefix used to organize and separate files by analysis run. Always required. 
+# v = <T or F>                              This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
+# s = pairwise Sets                         This sets the subdirectories that the code should be run using. 
+# g = gene set                              This sets the gene set (set name or file name) that the script should be run on, or "gene" for use on genes. 
+# c = significance cutoff                   This sets the cutoff for inclusion in the significant columns
+# w = writeData                             This sets if the data should be saved, potentially overwriting old combinations
+# p = usePermulations                       This sets if permulation data should be used. If set to "A", it will add permulations data, but use the unpermulationed data for significance. 
 
 
-args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=gene", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=KeggReactome", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
+args = c('r=ComplexDietCentralAnalysisSimplify', 'g=c("gene", "KeggReactome")')
 
-args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=MGI_Mammalian_Phenotype_Level_4", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=GO_Biological_Process_2023", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=EnrichmentHsSymbolsFile2", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-args = c("r=ComplexDietCentralAnalysisSimplifyAltReconstruction", "g=tissue_specific", "c=0.05", "s=T", 'p=c("Invertivore-Vertivore","Herbivore-Vertivore","Invertivore-Omnivore","Herbivore-Omnivore","Herbivore-Invertivore", "Carnivore-Herbivore")')
-
-
-# -- Standard Startup code -- 
-if(clusterRun)args = commandArgs(trailingOnly = TRUE)
-{  # Bracket used for collapsing purposes
-  #File Prefix
-  if(!is.na(cmdArgImport('r'))){
-    filePrefix = cmdArgImport('r')
-  }else{
-    stop("THIS IS AN ISSUE MESSAGE; SPECIFY FILE PREFIX")
-  }
-  
-  #  Output Directory 
-  if(!dir.exists("Output")){                                      #Make output directory if it does not exist
-    dir.create("Output")
-  }
-  outputFolderNameNoSlash = paste("Output/",filePrefix, sep = "") #Set the prefix sub directory
-  if(!dir.exists(outputFolderNameNoSlash)){                       #create that directory if it does not exist
-    dir.create(outputFolderNameNoSlash)
-  }
-  outputFolderName = paste("Output/",filePrefix,"/", sep = "")
-  
-  #  Force update argument
-  forceUpdate = FALSE
-  if(!is.na(cmdArgImport('v'))){                                 #Import if update being forced with argument 
-    forceUpdate = cmdArgImport('v')
-    forceUpdate = as.logical(forceUpdate)
-  }else{
-    message("Force update not specified, not forcing update")
+{
+  # -- Standard Startup code -- 
+  if(clusterRun)args = commandArgs(trailingOnly = TRUE)
+  {  # Bracket used for collapsing purposes
+    #File Prefix
+    if(!is.na(cmdArgImport('r'))){
+      filePrefix = cmdArgImport('r')
+    }else{
+      stop("THIS IS AN ISSUE MESSAGE; SPECIFY FILE PREFIX")
+    }
+    
+    #  Output Directory 
+    if(!dir.exists("Output")){                                      #Make output directory if it does not exist
+      dir.create("Output")
+    }
+    outputFolderNameNoSlash = paste("Output/",filePrefix, sep = "") #Set the prefix sub directory
+    if(!dir.exists(outputFolderNameNoSlash)){                       #create that directory if it does not exist
+      dir.create(outputFolderNameNoSlash)
+    }
+    outputFolderName = paste("Output/",filePrefix,"/", sep = "")
+    
+    #  Force update argument
+    forceUpdate = FALSE
+    if(!is.na(cmdArgImport('v'))){                                 #Import if update being forced with argument 
+      forceUpdate = cmdArgImport('v')
+      forceUpdate = as.logical(forceUpdate)
+    }else{
+      message("Force update not specified, not forcing update")
+    }
   }
 }
-
 
 
 # --- Argument Imports ---
@@ -70,66 +61,75 @@ pairwiseSets = c("Herbivore-Insectivore", "Herbivore-Vertivore", "Carnivore-Herb
 pairwiseSets = c("Herbivore-Invertivore", "Herbivore-Vertivore", "Carnivore-Herbivore", "Herbivore-Omnivore", "Invertivore-Vertivore", "Omnivore-Vertivore", "Invertivore-Omnivore")
 geneSet = NULL
 usingGo = F
-saveData = T
 usingGene = T
-saveCombinedData = T
+validGeneArguments = c("NULL", "gene", "Gene")
+
+writeData = T
+
 usePermulations = F
 addPermulations = F
-useOverlap =F
-useDelta = F
 
 { # Bracket used for collapsing purposes
   
   #pairwise Sets
-  if(!all(is.na(cmdArgImport('p')))){
-    if(all(cmdArgImport('p') == "NULL")){
+  if(!all(is.na(cmdArgImport('s')))){
+    if(all(cmdArgImport('s') == "NULL")){
       folderNames = basename(list.dirs(outputFolderName, full.names = TRUE, recursive = FALSE))
       pairwiseSets = folderNames[grep("-", folderNames)]
     }else{
-      pairwiseSets = cmdArgImport('p') 
+      pairwiseSets = cmdArgImport('s') 
     }
   }else{
     folderNames = basename(list.dirs(outputFolderName, full.names = TRUE, recursive = FALSE))
     pairwiseSets = folderNames[grep("-", folderNames)]
     message("Folders not specified, using all folders. Note that if driver analysis is active, this may cause issues.")
   }
-  
+
   #geneset
-  if(!is.na(cmdArgImport('g'))){
-    geneSet = cmdArgImport('g')
-    if(is.null(geneSet) | geneSet == "NULL" | geneSet == "gene" | geneSet == "Gene"){
+  if(!all(is.na(cmdArgImport('g')))){
+    geneSets = cmdArgImport('g')
+    if(is.null(geneSets) | any(geneSets %in% validGeneArguments)){
       usingGene = T
       message("Null geneset specified or gene specified, performing gene correlation.")
     }else{
-      usingGo = T
       usingGene = F
     }
+    
+    if(any(!geneSet %in% validGeneArguments)){
+      usingGo = T
+      geneSet = trimGmtFilenameToSetname(geneSet)
+    }else{
+      usingGo = F
+    }
+    
   }else{
     message("No geneset specified or gene specified, performing gene correlation.")
   }
   
-  #cutoffsaveData 
+  #cutoff 
   if(!is.na(cmdArgImport('c'))){
-    saveData = cmdArgImport('c')
+    significanceCutoff = cmdArgImport('c')
   }else{
     message("pvalue cuttoff not specified, using 0.05")
   }  
   
   
-  #saveData 
-  if(!is.na(cmdArgImport('s'))){
-    saveData = as.logical(cmdArgImport('s'))
+  #writeData 
+  if(!is.na(cmdArgImport('w'))){
+    writeData = as.logical(cmdArgImport('w'))
   }else{
-    message("saveData not specified, using TRUE")
+    message("writeData not specified, using TRUE")
   }
   
   #Use Permulations 
-  if(!is.na(cmdArgImport('l'))){
-    if(cmdArgImport('l') == "A"){
+  if(!is.na(cmdArgImport('p'))){
+    if(cmdArgImport('p') == "A"){
       usePermulations = T
       addPermulations = T
+    }else if(cmdArgImport('p') == "C"){
+      usePermulations = T
     }else{
-      usePermulations = as.logical(cmdArgImport('l'))
+      usePermulations = as.logical(cmdArgImport('p'))
     }
 
   }else{
@@ -152,11 +152,18 @@ getComparisionDifference = function(dataframe, colOne, colTwo){
 
 if(!usePermulations){
   pairwiseCorrelationFileName = paste(outputFolderName, filePrefix, "PairwiseCorrelationFile.rds", sep= "") #make a name for the pairwise comparisons based on prefix
+  overallCorrelationFilename = paste(outputFolderName, filePrefix, "CorrelationFile.rds", sep= "") #make a name for the pairwise comparisons based on prefix
 }else{
   pairwiseCorrelationFileName = paste(outputFolderName, filePrefix, "PermulationPairwiseCorrelationFile.rds", sep= "") #make a name for the pairwise comparisons based on prefix
+  overallCorrelationFilename = paste(outputFolderName, filePrefix, "PermulationCorrelationFile.rds", sep= "") #make a name for the pairwise comparisons based on prefix
 }
 
 correlationResults = readRDS(pairwiseCorrelationFileName)
+overallResults = readRDS(overallCorrelationFilename)
+overall = list(overallResults)
+names(overall)[[1]] = "Overall"
+correlationResults = append(correlationResults, overall)
+pairwiseSets = append(pairwiseSets, "Overall")
 
 if(usingGene){
   combinedResults = NA
@@ -203,133 +210,15 @@ if(usingGene){
       names(currentResults) = paste0(correlationPrefix, "-", names(currentResults))
       combinedResults = cbind(combinedResults, currentResults)
       
-      driverFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet, "DriverTable.rds")
-      if(file.exists(driverFilename)){
-        driverTable = readRDS(driverFilename)
-        driverTable = driverTable[,-grep("main", names(driverTable))]
-        names(driverTable)[which(names(driverTable) == "Driver")] = paste0(correlationPrefix, "-", "Driver")
-        names(driverTable)[which(names(driverTable) == "DriverNumeric")] = paste0(correlationPrefix, "-", "DriverNumeric")    
-        
-        combinedDrivers = cbind(combinedDrivers, driverTable[,grep(paste0(correlationPrefix,"-"), names(driverTable))])
-        combinedBinaries = cbind(combinedBinaries, driverTable[,-grep(paste0(correlationPrefix,"-"), names(driverTable))])
-        rm(driverTable)
-      }else{
-        message(paste0("Driver file not not exist for ", currentSet, ". Not including driver and continuing."))
-      }
       rm(currentResults)
       
     }
   }
   
   combinedResults = combinedResults[,-1]
-  if(!is.na(combinedDrivers)){
-    combinedDrivers = combinedDrivers[,-1]
-    combinedBinaries = combinedBinaries[,-1]
-    combinedBinaries = combinedBinaries[,-grep(".1", names(combinedBinaries))]
   
-    combinedResults = cbind(combinedResults, combinedDrivers)
-    combinedResults = cbind(combinedResults, combinedBinaries)
-  }
-  rm(combinedDrivers); rm(combinedBinaries)
-  
-  
-  
-  # -- Add overlap information -- 
-  if(useOverlap){
-    #Permualted
-    if(usePermulations & !addPermulations){
-      permSignificanceColumns = names(combinedResults)[grep("permSignificant", names(combinedResults))]
-      permGeneSignificanceResults = combinedResults[, names(combinedResults) %in% permSignificanceColumns]
-      
-      for(i in 2:length(permSignificanceColumns)){
-        combinations = combn(permSignificanceColumns, i, simplify = FALSE)
-        for(j in 1:length(combinations)){
-          currentCombination = combinations[[j]]
-          headers = gsub("-.*","",  currentCombination)
-          comboName = paste0(paste0(headers, collapse = "-"), "-PermOverlap")
-          
-          colsToCompare = permGeneSignificanceResults[,names(permGeneSignificanceResults) %in% currentCombination]
-          
-          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-          which(comboValue)
-          combinedResults$newOverlapColumn = comboValue
-          names(combinedResults)[length(names(combinedResults))] = comboName
-          rm(colsToCompare)
-        }
-        rm(combinations)
-      }
-      
-      #Unpermulated
-      significanceColumns = names(combinedResults)[grep("unpermSignificant", names(combinedResults))]
-      geneSignificanceResults = combinedResults[, names(combinedResults) %in% significanceColumns]
-      
-      for(i in 2:length(significanceColumns)){
-        combinations = combn(significanceColumns, i, simplify = FALSE)
-        for(j in 1:length(combinations)){
-          currentCombination = combinations[[j]]
-          headers = gsub("-.*","",  currentCombination)
-          comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
-          
-          colsToCompare = geneSignificanceResults[,names(geneSignificanceResults) %in% currentCombination]
-          
-          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-          which(comboValue)
-          combinedResults$newOverlapColumn = comboValue
-          names(combinedResults)[length(names(combinedResults))] = comboName
-          rm(colsToCompare)
-        }
-      }
-    }
-      
-    #Unpermulated
-    significanceColumns = names(combinedResults)[grep("significant", names(combinedResults))]
-    geneSignificanceResults = combinedResults[, names(combinedResults) %in% significanceColumns]
-    
-    for(i in 2:length(significanceColumns)){
-      combinations = combn(significanceColumns, i, simplify = FALSE)
-      for(j in 1:length(combinations)){
-        currentCombination = combinations[[j]]
-        headers = gsub("-.*","",  currentCombination)
-        comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
-        
-        colsToCompare = geneSignificanceResults[,names(geneSignificanceResults) %in% currentCombination]
-        
-        comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-        which(comboValue)
-        combinedResults$newOverlapColumn = comboValue
-        names(combinedResults)[length(names(combinedResults))] = comboName
-        rm(colsToCompare)
-      }
-      rm(combinations)
-    }
-  }
-  # -- Add Delta information -- 
-  if(useDelta){
-    rhoColumns = names(combinedResults)[grep("-Rho", names(combinedResults))]
-    geneRhoColumns = combinedResults[, names(combinedResults) %in% rhoColumns]
-    for(i in 2:length(rhoColumns)){
-      combinations = combn(rhoColumns, i, simplify = FALSE)
-      for(j in 1:length(combinations)){
-        currentCombination = combinations[[j]]
-        if(length(currentCombination) > 2){next}
-        headers = gsub("-.*","",  currentCombination)
-        comboName = paste0(paste0(headers, collapse = "-"), "-Delta")
-        
-        colsToCompare = geneRhoColumns[,names(geneRhoColumns) %in% currentCombination]
-        
-        deltaValue = abs(colsToCompare[1] - colsToCompare[2]) / sqrt(2)
-        
-        
-        
-        combinedResults$newDeltaColumn = deltaValue[,1]
-        names(combinedResults)[length(names(combinedResults))] = comboName
-        rm(colsToCompare)
-      }
-      rm(combinations)
-    }
-  }
   # -- save combination -- 
-  if(saveData){
+  if(writeData){
     combinedDataFilename = paste0(outputFolderName, filePrefix, "combinedGeneResults")
     write.csv(combinedResults, paste0(combinedDataFilename, ".csv"))
     saveRDS(combinedResults, paste0(combinedDataFilename, ".rds"))
@@ -339,164 +228,86 @@ if(usingGene){
 
 # --- Import GO Data --- 
 if(usingGo){
-  GOResults = list()
-  for(i in 1:length(pairwiseSets)){
-    currentSet = pairwiseSets[i]
-    correlationSubsetName = gsub("-", " - ", currentSet)
-    correlationPrefix = paste(substr(strsplit(currentSet, split = "-")[[1]],1,1), collapse = '')
+  goSets = geneSets[-which(geneSets %in% validGeneArguments)]
+  for(j in goSets){
+    geneSet = j
     
-    goFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet,"Enrichment-", geneSet, ".rds")
-    currentGoData = readRDS(goFilename)[[1]]
-
-    
-    
-    if(usePermulations){
-      if(exists(currentGoData$permP.adj)){
-        currentGoData$permSignificant = currentGoData$permP.adj < significanceCutoff
-        currentGoData$unpermSignificant = currentGoData$p.adj < significanceCutoff        
-      }else{
-        currentGoData$permSignificant = currentGoData$permP < significanceCutoff
-        currentGoData$unpermSignificant = currentGoData$p.adj < significanceCutoff
-      }
-      if(addPermulations){
-        currentGoData$significant = currentGoData$unpermSignificant
-      }else{
-        currentGoData$significant = currentGoData$permSignificant
-      }
-    }else{
-      currentGoData$significant = currentGoData$p.adj < significanceCutoff
-    }
-    
-    
-    
-    names(currentGoData) = paste0(correlationPrefix, "-", names(currentGoData))
-    
-    
-    driverFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet, "GoDriverTable-", geneSet, ".rds")
-    if(file.exists(driverFilename)){
-      driverTable = readRDS(driverFilename)
-      if(all(rownames(driverTable) == rownames(currentGoData))){
-        currentGoData$Driver = driverTable[which(names(driverTable) == "Driver")][[1]]
-        currentGoData$DriverNumeric = driverTable[which(names(driverTable) == "DriverNumeric")][[1]]
-        
-        names(currentGoData)[which(names(currentGoData) == "Driver")] = paste0(correlationPrefix, "-", "Driver")
-        names(currentGoData)[which(names(currentGoData) == "DriverNumeric")] = paste0(correlationPrefix, "-", "DriverNumeric")    
-        
-      }
-      rm(driverTable)
-    }
-    GOResults[[i]] = currentGoData
-    names(GOResults)[i] = correlationPrefix
-    
-  }
-  rm(currentGoData)
-  
-  GoCombinedResults = NA
-  longestGOResult = which(sapply(GOResults, nrow) == max(sapply(GOResults, nrow)))[1]
-  for(i in 1:length(GOResults)){
-    if(all(rownames(GOResults[[longestGOResult]]) == rownames(GOResults[[i]]))){
-      cat("Combining GO Data", i, "\n")
-      GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
-    }else{
+    GOResults = list()
+    for(i in 1:length(pairwiseSets)){
+      currentSet = pairwiseSets[i]
+      correlationSubsetName = gsub("-", " - ", currentSet)
+      correlationPrefix = paste(substr(strsplit(currentSet, split = "-")[[1]],1,1), collapse = '')
+      
+      goFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet,"Enrichment-", geneSet, ".rds")
       tryCatch({
-        cat("Mismatch in order; reordering current data to first data; Combining GO Data", i, "\n")
+        currentGoData = readRDS(goFilename)[[1]]
+
+        if(usePermulations){
+          if(exists(currentGoData$permP.adj)){
+            currentGoData$permSignificant = currentGoData$permP.adj < significanceCutoff
+            currentGoData$unpermSignificant = currentGoData$p.adj < significanceCutoff        
+          }else{
+            currentGoData$permSignificant = currentGoData$permP < significanceCutoff
+            currentGoData$unpermSignificant = currentGoData$p.adj < significanceCutoff
+          }
+          if(addPermulations){
+            currentGoData$significant = currentGoData$unpermSignificant
+          }else{
+            currentGoData$significant = currentGoData$permSignificant
+          }
+        }else{
+          currentGoData$significant = currentGoData$p.adj < significanceCutoff
+        }
         
-        which(!rownames(GOResults[[longestGOResult]]) %in% rownames(GOResults[[i]]))
         
-        matchedOrder = match(rownames(GOResults[[longestGOResult]]), rownames(GOResults[[i]]))
-        #matchedOrder = matchedOrder[-which(is.na(matchedOrder))]
-        GOResults[[i]] = GOResults[[i]][matchedOrder,]
+        
+        names(currentGoData) = paste0(correlationPrefix, "-", names(currentGoData))
+        
+        
+        GOResults[[i]] = currentGoData
+        names(GOResults)[i] = correlationPrefix
+      }, error = function(e) {
+        message("Skipping file: ", goFilename, " | Error: ", conditionMessage(e))
+      })
+    }
+    rm(currentGoData)
+    missingGoResults = which(sapply(GOResults, is.null)) # Remove any empty lists generated by missing enrichment files 
+    GOResults = GOResults[-missingGoResults]
+    
+    
+    GoCombinedResults = NA
+    longestGOResult = which(sapply(GOResults, nrow) == max(sapply(GOResults, nrow)))[1]
+    for(i in 1:length(GOResults)){
+      if(all(rownames(GOResults[[longestGOResult]]) == rownames(GOResults[[i]]))){
+        cat("Combining GO Data", i, "\n")
         GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
-      },error = function(e){      
-        stop("Rownames of GO results are not the same and cannot be reordered, there is an issue with the GO data.")
+      }else{
+        tryCatch({
+          cat("Mismatch in order; reordering current data to first data; Combining GO Data", i, "\n")
+          
+          which(!rownames(GOResults[[longestGOResult]]) %in% rownames(GOResults[[i]]))
+          
+          matchedOrder = match(rownames(GOResults[[longestGOResult]]), rownames(GOResults[[i]]))
+          #matchedOrder = matchedOrder[-which(is.na(matchedOrder))]
+          GOResults[[i]] = GOResults[[i]][matchedOrder,]
+          GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
+        },error = function(e){      
+          stop("Rownames of GO results are not the same and cannot be reordered, there is an issue with the GO data.")
         }
-
-      )
-
-      
-      
-      
-      
-      
-    }
-  }
-  GoCombinedResults = GoCombinedResults[,-1]
-  rm(GOResults)
-  
-  # -- Add overlap information -- 
-  if(useOverlap){
-    if(usePermulations & !addPermulations){
-      #Permulated
-      permGoSignificanceColumns = names(GoCombinedResults)[grep("PermSignificant", names(GoCombinedResults))]
-      permGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% permGoSignificanceColumns]
-      
-      for(i in 2:length(permGoSignificanceColumns)){
-        combinations = combn(permGoSignificanceColumns, i, simplify = FALSE)
-        for(j in 1:length(combinations)){
-          currentCombination = combinations[[j]]
-          headers = gsub("-.*","",  currentCombination)
-          comboName = paste0(paste0(headers, collapse = "-"), "-PermOverlap")
-          
-          colsToCompare = permGoSignificanceResults[,names(permGoSignificanceResults) %in% currentCombination]
-          
-          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-          which(comboValue)
-          GoCombinedResults$newOverlapColumn = comboValue
-          names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
-          rm(colsToCompare)
-        }
-        rm(combinations)
-      }
-      
-      #unpermulated
-      unpermGoSignificanceColumns = names(GoCombinedResults)[grep("unpermSignificant", names(GoCombinedResults))]
-      unpermGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% unpermGoSignificanceColumns]
-      
-      for(i in 2:length(unpermGoSignificanceColumns)){
-        combinations = combn(unpermGoSignificanceColumns, i, simplify = FALSE)
-        for(j in 1:length(combinations)){
-          currentCombination = combinations[[j]]
-          headers = gsub("-.*","",  currentCombination)
-          comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
-          
-          colsToCompare = unpermGoSignificanceResults[,names(unpermGoSignificanceResults) %in% currentCombination]
-          
-          comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-          which(comboValue)
-          GoCombinedResults$newOverlapColumn = comboValue
-          names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
-          rm(colsToCompare)
-        }
-        rm(combinations)
-      }
-    }
-    
-    #unpermulated
-    unpermGoSignificanceColumns = names(GoCombinedResults)[grep("significant", names(GoCombinedResults))]
-    unpermGoSignificanceResults = GoCombinedResults[, names(GoCombinedResults) %in% unpermGoSignificanceColumns]
-    
-    for(i in 2:length(unpermGoSignificanceColumns)){
-      combinations = combn(unpermGoSignificanceColumns, i, simplify = FALSE)
-      for(j in 1:length(combinations)){
-        currentCombination = combinations[[j]]
-        headers = gsub("-.*","",  currentCombination)
-        comboName = paste0(paste0(headers, collapse = "-"), "-UnpermOverlap")
         
-        colsToCompare = unpermGoSignificanceResults[,names(unpermGoSignificanceResults) %in% currentCombination]
-        
-        comboValue = apply(colsToCompare, 1, function(row) all(row == TRUE) == 1)
-        which(comboValue)
-        GoCombinedResults$newOverlapColumn = comboValue
-        names(GoCombinedResults)[length(names(GoCombinedResults))] = comboName
-        rm(colsToCompare)
+        )
       }
-      rm(combinations)
     }
-  }
-  if(saveCombinedData){
-    combinedGODataFilename = paste0(outputFolderName, filePrefix, "combinedGOResults-", geneSet)
-    write.csv(GoCombinedResults, paste0(combinedGODataFilename, ".csv"))
-    if(saveData){saveRDS(GoCombinedResults, paste0(combinedGODataFilename, ".rds"))}
+    GoCombinedResults = GoCombinedResults[,-1]
+    rm(GOResults)
+    
+    
+    
+    if(writeData){
+      combinedGODataFilename = paste0(outputFolderName, filePrefix, "combinedGOResults-", geneSet)
+      write.csv(GoCombinedResults, paste0(combinedGODataFilename, ".csv"))
+      saveRDS(GoCombinedResults, paste0(combinedGODataFilename, ".rds"))
+    }
   }
 }
 

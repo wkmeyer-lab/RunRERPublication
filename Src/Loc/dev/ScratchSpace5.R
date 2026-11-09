@@ -48,8 +48,232 @@ palette(c("#1B9E77", "#000000", "#7570B3", "#E7298A"))
 packageVersion("RERconverge")
 
 
+#---------------------------------------------------------------------
+# --- Test HighSugar  --- 
+# --------------------------------------------------------------------
 
 
+plotTreeCategorical(commonCategoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = commonMainTrees$masterTree)
+plotTreeCategorical(categoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = mainTrees$masterTree)
+
+plotTreeCategorical(commonCategoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = commonMasterAdded)
+plotTreeCategorical(categoricalTreeExtraTip, c("Herbivore", "Insectivore", "Omnivore", "Vertivore", "zMixedPredator"), master = masterTreeAdded)
+
+saveRDS(toyTrees, "Results/toyTrees.rds")
+
+
+
+
+
+
+
+mergedData = read.csv("Data/mergedData.csv")
+
+which(toyTips %in% mergedData$CommonName)
+
+toyTrees$masterTree$tip.label
+toyTips = toyTrees$masterTree$tip.label
+
+scientificTips = ZonomNameConvertVectorCommon(toyTips, tipColumn = "CommonName", toScientific = T)
+
+
+demoPhen = data.frame(toyTips, scientificTips)
+demoPhen$myPhen = rep(NA)
+
+write.csv(demoPhen, "Data/examplePhenotypeData.csv")
+#---------------------------------------------------------------------
+# --- Process Wynn DNA dna, make new figures --- 
+# --------------------------------------------------------------------
+
+DNAReapirMainData = readRDS("Results/DnaRepairResultsForWynn.rds")
+palette(c("#1B9E77", "#7570B3", "#000000", "#E7298A"))
+colorSet = c("#1B9E77", "#7570B3", "#000000", "#E7298A")
+colorSet = c("#1B9E77", "#7570B3","#E7298A", "#000000" )
+PhenotypeKey = c("Herbivore", "Invertivore", "Omnivore", "Vertivore")
+
+edgeTables = lapply(DNAReapirMainData, `[[`, 1)
+
+#Make log transformation
+edgeTables = lapply(edgeTables, function(df){
+  df[[4]] <- log(abs(df[[3]])) * sign(df[[3]])
+  names(df)[4] = "Log Signed Continuous Value"
+  return(df)
+})
+
+edgeTables = lapply(edgeTables, function(df){
+  df[[5]] = PhenotypeKey[df[[2]]]
+  df[[5]] = factor(df[[5]], levels = c("Herbivore", "Invertivore", "Vertivore", "Omnivore")) 
+  names(df)[5] = "Phenotype "
+  return(df)
+})
+
+inData = edgeTables[[1]]
+
+makeViolin = function(index, inList = edgeTables, colorScale = colorSet, yLabel = "auto", log = F){
+  inData = inList[[index]]
+  if(yLabel == "auto"){
+    yVal = names(inList)[[index]]
+  }else{
+    yVal = yLabel
+  }
+  
+  if(log){
+    yCol = 4
+  }else{
+    yCol = 3
+  }
+  
+  violinPlot = ggplot(data = inData, aes(x = `Phenotype `,
+                           y = .data[[names(inData)[yCol]]], col=`Phenotype `)) +
+    geom_violin() +
+    geom_jitter(position=position_jitter(0.2), show.legend = T) +
+    theme_classic() +
+    labs(x = names(inData)[2],
+         y = yVal)+
+    scale_color_manual(values=colorScale)+
+    theme(axis.text.x = element_text(angle = 45, hjust = 1)) 
+  violinPlot
+}
+
+MakeViolinPair = function(label, useLog = F, inList = edgeTables){
+  indexes = grep(label, names(inList))
+  
+  if(useLog){
+    yLab1 = paste("signed log", label, "change on branch")
+    yLab2 = paste("signed log",label, "mean on branch")
+  }else{
+    yLab1 = paste(label, "change on branch")
+    yLab2 = paste(label, "mean on branch") 
+  }
+  
+
+  violinDiff = makeViolin(indexes[[1]], yLabel = yLab1, log = useLog)
+  violinMean = makeViolin(indexes[[2]], yLabel = yLab2, log = useLog)
+  
+  outplot = grid.arrange(violinMean, violinDiff, nrow=1)
+}
+
+AgePlot = MakeViolinPair("Age")
+CorrettedAgePlot = MakeViolinPair("SizeCorrectedAge")
+CancerPlot = MakeViolinPair("Cancer")
+TePlot = MakeViolinPair("Te", useLog = F)
+TeLogPlot = MakeViolinPair("Te", useLog = T)
+
+grid.arrange(AgePlot, CorrettedAgePlot, CancerPlot, TePlot)
+grid.arrange(AgePlot, CorrettedAgePlot, CancerPlot, TeLogPlot)
+
+
+violinPlotFilename = "Output/ComplexDietCentralAnalysisSimplify2/Supplmentary Figure 6 -- DNA Related Phnotypes By Diet.png"
+png(violinPlotFilename, height = 8, width = 16, units = "in", res = 216)
+grid.arrange(AgePlot, CorrettedAgePlot, CancerPlot, TeLogPlot)
+dev.off()
+
+library(dunn.test)
+df = edgeTables[[1]]
+
+runTestOnCol = function(df, col){
+  baseKrusal = kruskal.test(df[,col] ~ df[,2])
+  baseDunn = dunn.test(df[,col], g = df$`Phenotype `,
+                       method="bh")
+  
+  
+  overallOutputValues = c(unlist(baseKrusal[c(1, 3)]), baseDunn[[1]]) 
+  
+  krusalNames = paste("Kruskal", unlist(names(baseKrusal[c(1, 3)])))
+  names(overallOutputValues) = c(krusalNames, paste("Dunn", names(baseDunn)[1]))
+  
+  dunnNames = paste("Dunn", names(baseDunn)[2:4])
+  dunnOutput = data.frame(baseDunn[2:4])
+  rownames(dunnOutput) = baseDunn[[5]]
+  
+  combinedOutput = rbind(names(overallOutputValues), overallOutputValues, dunnNames, dunnOutput)
+  rownames(combinedOutput) = c("Overall Tests", "Overall Values", "Dunn Tests", baseDunn[[5]])
+  names(combinedOutput) = NULL
+  combinedOutput
+}
+
+runTests = function(df){
+
+  baseResults = runTestOnCol(df, 3)
+  
+  logResults = runTestOnCol(df, 4)
+  
+  outputs = list(baseResults, logResults)
+  names(outputs) = c("baseResults", "logResults")
+  outputs
+}
+
+
+
+test = runTests(edgeTables[[1]])
+
+test = test[c(1:2)]
+
+statsOut = lapply(edgeTables, function(df){
+  out = runTests(df)
+})
+
+
+flatList <- unlist(statsOut, recursive = FALSE)
+
+names(flatList) <- unlist(
+  lapply(names(statsOut), function(x) {
+    paste0(x, "-", names(statsOut[[x]]))
+  })
+)
+
+for(i in 1:length(flatList)){
+  csvName = paste0("Results/Temp/ST9-", names(flatList)[i], ".csv")
+  write.csv(flatList[i], csvName)
+}
+
+
+
+
+outputTable 
+
+
+#---------------------------------------------------------------------
+# --- IMproved Data Combination script --- 
+# --------------------------------------------------------------------
+
+
+
+source("Src/Reu/convertColNameToIndex.R")
+source("Src/Reu/addColumnToData.R")
+
+mergedData = read.csv("Data/mergedData.csv")
+ageDataSheet = read.csv("Data/MaturityLifespanData.csv")
+TEDatasheet = read.csv("Data/TEContentOsmanski2023TS8.csv")
+cancerDatasheet = read.csv("Data/species-cancer-prevalence-data.csv")
+
+
+combinedData = addColumnToData(mergedData, ageDataSheet, c("MaximumAge"))
+combinedData = addColumnToData(combinedData, cancerDatasheet, "NeoplasiaPrevalence")
+combinedData = addColumnToData(combinedData, TEDatasheet, "Young_DNA_proportion", "ActiveTransposableElementEstimatedProportion")
+
+
+write.csv(combinedData, "Data/mergedData.csv", row.names = F)
+
+
+supTable1 = read.csv("Results/SupplementaryTable1 -- SpeciesNamesTipsAndDiet.csv")
+combinedData = addColumnToData(supTable1, ageDataSheet, c("MaximumAge"))
+combinedData = addColumnToData(combinedData, cancerDatasheet, "NeoplasiaPrevalence")
+combinedData = addColumnToData(combinedData, TEDatasheet, "Young_DNA_proportion", "ActiveTransposableElementEstimatedProportion")
+
+write.csv(combinedData, "Results/SupplementaryTable1 -- SpeciesNamesTipsAndDiet.csv", row.names = F)
+#---------------------------------------------------------------------
+# --- Make bodysize corrected age  --- 
+# --------------------------------------------------------------------
+ageDataSheet = read.csv("Data/MaturityLifespanData.csv")
+
+model <- lm(MaximumAge ~ combinedBodysize,
+            data = ageDataSheet,
+            na.action = na.exclude)
+
+ageDataSheet$bodysizeCorrectedAge <- residuals(model)
+
+#write.csv(ageDataSheet, "Data/MaturityLifespanData.csv", row.names = F)
 #---------------------------------------------------------------------
 # --- Longevity results  --- 
 # --------------------------------------------------------------------
@@ -67,6 +291,8 @@ mainAllSpecies = readRDS("Output/ComplexDietCentralAnalysisSimplifyAllSpecies/Co
 ageDataSheet = read.csv("Data/MaturityLifespanData.csv")
 mainTrees = readRDS("Data/zoonomiaAllMammalsTrees.rds")
 
+keyOrder = mergedData$ZoonomiaTip
+
 mainCategoricalTree = readRDS("Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2CategoricalTree.rds")
 plotTreeCategorical(mainCategoricalTree, c("Herbivore", "Insectivore", "Omnivore", "Vertivore"), master = masterTree)
 
@@ -75,9 +301,12 @@ TEDatasheet$Zoonomia = mergedData$ZoonomiaTip[match(tolower(TEDatasheet$Species)
 
 cancerDatasheet = read.csv("Data/species-cancer-prevalence-data.csv")
 cancerDatasheet$Zoonomia = mergedData$ZoonomiaTip[match(gsub(" ", "_", tolower(cancerDatasheet$Species)), mergedData$Scientific_Binomial)]
+  
+  
 
 
 
+  
 
 masterTree = mainTrees$masterTree
 categoricalTree = mainCategoricalTree
@@ -182,6 +411,9 @@ makeSubsetCategoricalTreeToContiousData = function(DataColumn = get("DataColumn"
 AgeDiffTrees = makeSubsetCategoricalTreeToContiousData("MaximumAge", "diff", continousDataSheet = ageDataSheet)
 AgeMeanTrees = makeSubsetCategoricalTreeToContiousData("MaximumAge", "mean", continousDataSheet = ageDataSheet)
 
+SizeCorrectedAgeDiffTrees = makeSubsetCategoricalTreeToContiousData("MaximumAge", "diff", continousDataSheet = ageDataSheet)
+SizeCorrectedAgeMeanTrees = makeSubsetCategoricalTreeToContiousData("MaximumAge", "mean", continousDataSheet = ageDataSheet)
+
 TeDiffTrees = makeSubsetCategoricalTreeToContiousData("Young_DNA_proportion", "diff", continousDataSheet = TEDatasheet)
 TeMeanTrees = makeSubsetCategoricalTreeToContiousData("Young_DNA_proportion", "mean", continousDataSheet = TEDatasheet)
 
@@ -190,8 +422,8 @@ CancerMeanTrees = makeSubsetCategoricalTreeToContiousData("NeoplasiaPrevalence",
 
 
 
-comboOutput = list(AgeDiffTrees, AgeMeanTrees, TeDiffTrees, TeMeanTrees, CancerDiffTrees, CancerMeanTrees)
-names(comboOutput) = c("AgeDiffTrees", "AgeMeanTrees", "TeDiffTrees", "TeMeanTrees", "CancerDiffTrees", "CancerMeanTrees")
+comboOutput = list(AgeDiffTrees, AgeMeanTrees, SizeCorrectedAgeDiffTrees, SizeCorrectedAgeMeanTrees, TeDiffTrees, TeMeanTrees, CancerDiffTrees, CancerMeanTrees)
+names(comboOutput) = c("AgeDiffTrees", "AgeMeanTrees","SizeCorrectedAgeDiffTrees", "SizeCorrectedAgeMeanTrees", "TeDiffTrees", "TeMeanTrees", "CancerDiffTrees", "CancerMeanTrees")
 
 saveRDS(comboOutput, "Results/DnaRepairResultsForWynn.rds")
 
@@ -203,20 +435,253 @@ meanBodysizeTrees = makeSubsetCategoricalTreeToContiousData("combinedBodysize", 
 
 #
 
+#---------------------------------------------------------------------
+# --- Perms compare --- 
+# --------------------------------------------------------------------
+
+source("Src/Reu/convertColnameToIndex.R")
+library("ggvenn")
+library(gridExtra)
+geneData = readRDS("Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGeneResultsWithAlternatesPermulated.rds")
+categoryData = readRDS("Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGOResultsWithAlternatesPermulated-KeggReactome.rds")
+
+makeVenn = function(infix, data){
+  robustSig = convertColnameToIndex(paste0(infix, "-significantRobust"), data)
+  permSig = convertColnameToIndex(paste0(infix, "-permSignificant"), data)
+  mainSig = convertColnameToIndex(paste0(infix, "-significant"), data)
+  altSig = convertColnameToIndex(paste0(infix, "-PadjNumSignificant"), data)
+  
+  
+  venn_list <- list(
+    Robust = which(data[,robustSig]),
+    #Alternates = which(combinedAltAndPerm[,altSig] > 50),
+    Permulations = which(data[,permSig]),
+    Main = which(data[,mainSig])
+    
+  )
+  vennout = ggvenn(venn_list) +  labs(title = infix)
+}
+
+
+catHI = makeVenn("HI", categoryData)
+catHV = makeVenn("HV", categoryData)
+catIV = makeVenn("IV", categoryData)
+
+grid.arrange(catHI, catHV, catIV, nrow = 2)
 
 
 
+geneHI = makeVenn("HI", geneData)
+geneHV = makeVenn("HV", geneData)
+geneIV = makeVenn("IV", geneData)
+
+grid.arrange(geneHI, geneHV, geneIV, nrow = 2)
+
+genesToCheck = c("ACADSB", "CLDN16", "CPB1", "PNLIP", "SLC13A2", "SLC14A2", "HSD11B1")
+
+
+HIstart = grep("HI-", names(geneData))[1]
+HVstart = (grep("HV-", names(geneData))[1])
+IVstart = grep("IV-", names(geneData))[1]
+
+permGeneCheck = geneData[which(rownames(geneData) %in% genesToCheck), c(HIstart:(HIstart+4), HVstart:(HVstart+5), IVstart:(IVstart+4))]
 
 
 
+makeCorPlot = function(x, y, prefix, titleVal, log = F, secondLabel = T){
+  
+  if(log){
+    xlabel = paste0(prefix, " log Main P-value")
+    ylabel = paste0(prefix, " log Permulation P-value")
+  }else{
+    xlabel = paste0(prefix, " Main P-value")
+    ylabel = paste0(prefix, " Permulation P-value")
+  }
+  
+  plot(x, y,
+       xlab = xlabel,
+       ylab = ylabel,
+       main = titleVal
+  )
+  
+  # Calculate R-squared using all finite values
+  valid <- is.finite(x) & is.finite(y)
+  model <- lm(y ~ x, subset = valid)
+  rSquared <- summary(model)$r.squared
+  
+  
+  if(log){
+    # Calculate R-squared excluding X = 1 and X = -1
+    validFiltered <- valid & x != 0
+    modelFiltered <- lm(y ~ x, subset = validFiltered)
+    rSquaredFiltered <- summary(modelFiltered)$r.squared 
+    
+  }else{
+    # Calculate R-squared excluding X = 1 and X = -1
+    validFiltered <- valid & x != 1 & x != -1
+    modelFiltered <- lm(y ~ x, subset = validFiltered)
+    rSquaredFiltered <- summary(modelFiltered)$r.squared
+  }
+  
+  if(!secondLabel){
+    legend("topleft",
+           legend = c(
+             bquote(R^2 == .(round(rSquared, 3)))
+           ),
+           bty = "n")
+  }else{
+    
+    if(log){
+      # Add both R-squared labels
+      legend("topleft",
+             legend = c(
+               bquote(R^2 == .(round(rSquared, 3))),
+               bquote(R^2 ~ "(excluding X = 0)" == .(round(rSquaredFiltered, 3)))
+             ),
+             bty = "n")
+    }else{
+      # Add both R-squared labels
+      legend("topleft",
+             legend = c(
+               bquote(R^2 == .(round(rSquared, 3))),
+               bquote(R^2 ~ "(excluding X = ±1)" == .(round(rSquaredFiltered, 3)))
+             ),
+             bty = "n")
+    }
+  }
+}
 
 
 
+HiPlog = log(geneData$`HI-P`) * sign(geneData$`HI-Rho`)
+HiPermPlog = log(geneData$`HI-permP`) * sign(geneData$`HI-Rho`)
+
+HvPlog = log(geneData$`HV-P`) * sign(geneData$`HV-Rho`)
+HvPermPlog = log(geneData$`HV-permP`) * sign(geneData$`HV-Rho`)
+
+IvPlog = log(geneData$`IV-P`) * sign(geneData$`IV-Rho`)
+IvPermPlog = log(geneData$`IV-permP`) * sign(geneData$`IV-Rho`)
+
+HiP = (geneData$`HI-P`) * sign(geneData$`HI-Rho`)
+HiPermP = (geneData$`HI-permP`) * sign(geneData$`HI-Rho`)
+
+HvP = (geneData$`HV-P`) * sign(geneData$`HV-Rho`)
+HvPermP = (geneData$`HV-permP`) * sign(geneData$`HV-Rho`)
+
+IvP = (geneData$`IV-P`) * sign(geneData$`IV-Rho`)
+IvPermP = (geneData$`IV-permP`) * sign(geneData$`IV-Rho`)
+
+
+cor(HiPlog, HiPermPlog, method = "spearman", use = "complete.obs")
+cor(HvPlog, HvPermPlog, method = "spearman", use = "complete.obs")
+cor(IvPlog, IvPermPlog, method = "spearman", use = "complete.obs")
 
 
 
+par(mfrow= c(2,3))
+makeCorPlot(HiP, HiPermP, "HI", "Invertiore-Herbivore Genes", secondLabel = T)
+makeCorPlot(HvP, HvPermP, "HV", "Vertiore-Herbivore Genes", secondLabel = T)
+makeCorPlot(IvP, IvPermP, "IV", "Invertiore-Vertiore Genes", secondLabel = T)
 
 
+makeCorPlot(HiPlog, HiPermPlog, "HI", "Invertiore-Herbivore Genes", log = T)
+makeCorPlot(HvPlog, HvPermPlog, "HV", "Vertiore-Herbivore Genes", log = T)
+makeCorPlot(IvPlog, IvPermPlog, "IV", "Invertiore-Vertiore Genes", log = T)
+
+
+mainStictCorFilename = "Output/ComplexDietCentralAnalysisSimplify2/Supplmentary Figure 6 -- Correlation with Permulations.png"
+png(mainStictCorFilename, height = 6, width = 12, units = "in", res = 216)
+par(mfrow= c(2,3))
+makeCorPlot(HiP, HiPermP, "HI", "Invertiore-Herbivore Genes", secondLabel = T)
+makeCorPlot(HvP, HvPermP, "HV", "Vertiore-Herbivore Genes", secondLabel = T)
+makeCorPlot(IvP, IvPermP, "IV", "Invertiore-Vertiore Genes", secondLabel = T)
+
+makeCorPlot(HiPlog, HiPermPlog, "HI", "Invertiore-Herbivore Genes", log = T)
+makeCorPlot(HvPlog, HvPermPlog, "HV", "Vertiore-Herbivore Genes", log = T)
+makeCorPlot(IvPlog, IvPermPlog, "IV", "Invertiore-Vertiore Genes", log = T)
+dev.off()
+
+data.frame(geneData$`HI-P`, geneData$`HI-permP`)
+
+
+
+mergedData = read.csv("Data/mergedData.csv")
+
+mergedData$CommonName[which(mergedData$SimplifiedDietConvertEqualDrop == "zMixedPredator")]
+#---------------------------------------------------------------------
+# --- Perms file updating  --- 
+# --------------------------------------------------------------------
+
+corrResults = readRDS("Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGeneResultsWithAlternates.rds")
+permData = readRDS("Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2permulationsPValueCorrelations.rds")
+permDataPairwise = permData[[2]]
+
+permDataSingleFrame = data.frame(permDataPairwise[[1]]$permP, permDataPairwise[[1]]$permP.adj, permDataPairwise[[1]]$numTotalPerms, permDataPairwise[[4]]$permP, permDataPairwise[[4]]$permP.adj, permDataPairwise[[4]]$numTotalPerms, permDataPairwise[[5]]$permP, permDataPairwise[[5]]$permP.adj, permDataPairwise[[5]]$numTotalPerms)
+names(permDataSingleFrame) = c("HI-permP", "HI-permP.adj", "HI-totalPerms", "HV-permP", "HV-permP.adj", "HV-totalPerms", "IV-permP", "IV-permP.adj", "IV-totalPerms")
+
+permDataSingleFrame$`HI-permSignificant` = (permDataSingleFrame$`HI-permP.adj` < 0.05)
+permDataSingleFrame$`HV-permSignificant` = (permDataSingleFrame$`HV-permP.adj` < 0.05)
+permDataSingleFrame$`IV-permSignificant` = (permDataSingleFrame$`IV-permP.adj` < 0.05)
+
+permDataSingleFrame = permDataSingleFrame[,c(10,1:3, 11, 4:6, 12, 7:9)]
+
+
+
+corrResults = cbind(corrResults, permDataSingleFrame)
+
+
+HIstart = grep("HI-", names(corrResults))[2]
+HIperm = tail(grep("HI-", names(corrResults)), 4)
+
+HVstart = (grep("HV-", names(corrResults))[2])
+HVperm = tail(grep("HV-", names(corrResults)), 4)
+
+IVstart = grep("IV-", names(corrResults))[2]
+IVperm = tail(grep("IV-", names(corrResults)), 4)
+
+corrResults = corrResults[,c(1:HIstart, HIperm, (HIstart+1):HVstart, HVperm, (HVstart+1):IVstart, IVperm, (IVstart+1):(ncol(corrResults)-12))]
+
+#saveRDS(corrResults, "Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGeneResultsWithAlternatesPermulated.rds")
+#write.csv(corrResults, "Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGeneResultsWithAlternatesPermulated.csv")
+
+
+
+HIPermResults = readRDS("Output/ComplexDietCentralAnalysisSimplify2/Herbivore-Invertivore/ComplexDietCentralAnalysisSimplify2Herbivore-InvertivoreEnrichment-Permulation-KeggReactome.rds")[[1]]
+names(HIPermResults) = (c("stat", "permP", "permP.adj", "num.genes", "gene.vals"))
+HIPermResults$permSignificant = (HIPermResults$permP.adj <0.05)
+names(HIPermResults) = paste0("HI-", names(HIPermResults))
+
+HVPermResults = readRDS("Output/ComplexDietCentralAnalysisSimplify2/Herbivore-Vertivore/ComplexDietCentralAnalysisSimplify2Herbivore-VertivoreEnrichment-Permulation-KeggReactome.rds")[[1]]
+names(HVPermResults) = (c("stat", "permP", "permP.adj", "num.genes", "gene.vals"))
+HVPermResults$permSignificant = (HVPermResults$permP.adj < 0.05)
+
+names(HVPermResults) = paste0("HV-", names(HVPermResults))
+
+IVPermResults = readRDS("Output/ComplexDietCentralAnalysisSimplify2/Invertivore-Vertivore/ComplexDietCentralAnalysisSimplify2Invertivore-VertivoreEnrichment-Permulation-KeggReactome.rds")[[1]]
+names(IVPermResults) = (c("stat", "permP", "permP.adj", "num.genes", "gene.vals"))
+IVPermResults$permSignificant = (IVPermResults$permP.adj < 0.05)
+names(IVPermResults) = paste0("IV-", names(IVPermResults))
+
+CatResults = readRDS("Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGOResultsWithAlternates-KeggReactome.rds")
+
+CatPermResults = cbind(HIPermResults[,c(6,2:3)], HVPermResults[,c(6,2:3)], IVPermResults[,c(6,2:3)])
+
+CatResults = cbind(CatResults, CatPermResults)
+
+HIstart = grep("HI-", names(CatResults))[2]
+HIperm = tail(grep("HI-", names(CatResults)), 3)
+
+HVstart = (grep("HV-", names(CatResults))[2])
+HVperm = tail(grep("HV-", names(CatResults)), 3)
+
+IVstart = grep("IV-", names(CatResults))[2]
+IVperm = tail(grep("IV-", names(CatResults)), 3)
+
+
+
+CatResults = CatResults[,c(1:HIstart, HIperm, (HIstart+1):HVstart, HVperm, (HVstart+1):IVstart, IVperm, (IVstart+1):(ncol(CatResults)-9))]
+#saveRDS(CatResults, "Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGOResultsWithAlternatesPermulated-KeggReactome.rds")
+#write.csv(CatResults, "Output/ComplexDietCentralAnalysisSimplify2/ComplexDietCentralAnalysisSimplify2combinedGOResultsWithAlternatesPermulated-KeggReactome.csv")
 
 
 
@@ -230,6 +695,17 @@ meanBodysizeTrees = makeSubsetCategoricalTreeToContiousData("combinedBodysize", 
 # --- Misc paper checks--- 
 # --------------------------------------------------------------------
 
+
+
+OVerallGo = readRDS("Output/ComplexDietCentralAnalysisSimplify2/Overall/ComplexDietCentralAnalysisSimplify2OverallEnrichment-KeggReactome.rds")
+write.csv(OVerallGo, "Output/ComplexDietCentralAnalysisSimplify2/Overall/ComplexDietCentralAnalysisSimplify2OverallEnrichment-KeggReactome.csv")
+
+
+OVerallGEne = readRDS("Output/ComplexDietCentralAnalysisSimplify2/Overall/ComplexDietCentralAnalysisSimplify2OverallCorrelationFile.rds")
+write.csv(OVerallGEne, "Output/ComplexDietCentralAnalysisSimplify2/Overall/ComplexDietCentralAnalysisSimplify2OverallCorrelationFile.csv")
+
+
+
 mergedData = read.csv("Data/mergedData.csv")
 
 mergedData$CommonName[which(mergedData$SimplifiedDietConvertEqualDrop =="zMixedPredator")]
@@ -237,6 +713,8 @@ mergedData$CommonName[which(mergedData$SimplifiedDietConvertEqualDrop =="zMixedP
 supData1 = read.csv("Results/SupplementaryTable1 -- SpeciesNamesTipsAndDiet.csv")
 
 
+
+names(mainTrees)
 
 supData1$HerbivoreType = rep("TBD")
 

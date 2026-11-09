@@ -22,7 +22,9 @@ library(data.table)
 # o = <T or F>                        This value is used to run only the p value calculation, and not the combination. 
 
 #----------------
-args = (c('r=ComplexDietCentralAnalysisSimplify2'))
+args = (c('r=CategoricalDiet3Phen', "n=2", "t=Dev"))
+args = (c('r=CategoricalInsVertivoreTreeLiamInference', "n=2", "s=7"))
+args = (c('r=ComplexDietCentralAnalysis', 'c=T'))
 
 # --- Standard start-up code ---
 if(clusterRun){args = commandArgs(trailingOnly = TRUE)}

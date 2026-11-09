@@ -6,6 +6,7 @@ library(RERconverge)
 library(tools)
 source("Src/Reu/cmdArgImport.R")
 library(data.table)
+source("Src/Reu/trimGmtFilenameToSetname.R")
 
 # -- Command arguments list
 # r = filePrefix                                                               This is a prefix used to organize and separate files by analysis run. Always required. 
@@ -13,160 +14,213 @@ library(data.table)
 # g = geneSet                                                                  This is the gmtset(as shown in the filename) of enrichment runs to be combined. 
 
 #----------------
-args = c('r=ComplexDietCentralAnalysis', 's=g', 'g=KeggReactome', 'l=170', 'i=1')
-args = c('r=ComplexDietCentralAnalysisSimplifyEqualDrop', 's=g', 'g=KeggReactome', 'l=170')
-args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 's=g', 'g=KeggReactome', 'l=170')
+
+args = c('r=ComplexDietCentralAnalysisSimplify2', 's=g', 'g=gene', 'l=170')
 args = c('r=ComplexDietCentralAnalysisSimplify2', 's=g', 'g=KeggReactome', 'l=170')
 
-geneSet = NULL
-useGO = F
 
-#Gmt set
-if(!any(is.na(cmdArgImport('g')))){
-  geneSet = cmdArgImport('g')
-  useGO = T
+
+
+
+{
+  # --- Standard start-up code ---
+  if(clusterRun)args = commandArgs(trailingOnly = TRUE)
+  {  # Bracket used for collapsing purposes
+    #File Prefix
+    if(!is.na(cmdArgImport('r'))){
+      filePrefix = cmdArgImport('r')
+    }else{
+      stop("THIS IS AN ISSUE MESSAGE; SPECIFY FILE PREFIX")
+    }
+    
+    #  Output Directory 
+    if(!dir.exists("Output")){                                      #Make output directory if it does not exist
+      dir.create("Output")
+    }
+    outputFolderNameNoSlash = paste("Output/",filePrefix, sep = "") #Set the prefix sub directory
+    if(!dir.exists(outputFolderNameNoSlash)){                       #create that directory if it does not exist
+      dir.create(outputFolderNameNoSlash)
+    }
+    outputFolderName = paste("Output/",filePrefix,"/", sep = "")
+    
+    #  Force update argument
+    forceUpdate = FALSE
+    if(!is.na(cmdArgImport('v'))){                                 #Import if update being forced with argument 
+      forceUpdate = cmdArgImport('v')
+      forceUpdate = as.logical(forceUpdate)
+    }else{
+      message("Force update not specified, not forcing update")
+    }
+  }
+}
+
+
+
+# --- Argument Imports ---
+# Defaults
+geneSets = NULL
+usingGo = F
+usingGene = T
+validGeneArguments = c("NULL", "gene", "Gene")
+
+
+#genesets
+if(!all(is.na(cmdArgImport('g')))){
+  geneSets = cmdArgImport('g')
+  if(is.null(geneSets) | any(geneSets %in% validGeneArguments)){
+    usingGene = T
+    message("Null geneset specified or gene specified, performing gene correlation.")
+  }else{
+    usingGene = F
+  }
+  
+  if(any(!geneSets %in% validGeneArguments)){
+    usingGo = T
+    geneSets = trimGmtFilenameToSetname(geneSets)
+  }else{
+    usingGo = F
+  }
+  
 }else{
-  paste("No gmt  arugment, not combining enrichments")                          #Report using default
-  message("No gmt  arugment, not combining enrichments")
+  message("No geneset specified or gene specified, performing gene correlation.")
 }
 
 
-# --- Standard start-up code ---
-if(clusterRun)args = commandArgs(trailingOnly = TRUE)
-{  # Bracket used for collapsing purposes
-  #File Prefix
-  if(!is.na(cmdArgImport('r'))){
-    filePrefix = cmdArgImport('r')
-  }else{
-    stop("THIS IS AN ISSUE MESSAGE; SPECIFY FILE PREFIX")
-  }
-  
-  #  Output Directory 
-  if(!dir.exists("Output")){                                      #Make output directory if it does not exist
-    dir.create("Output")
-  }
-  outputFolderNameNoSlash = paste("Output/",filePrefix, sep = "") #Set the prefix sub directory
-  if(!dir.exists(outputFolderNameNoSlash)){                       #create that directory if it does not exist
-    dir.create(outputFolderNameNoSlash)
-  }
-  outputFolderName = paste("Output/",filePrefix,"/", sep = "")
-  
-  #  Force update argument
-  forceUpdate = FALSE
-  if(!is.na(cmdArgImport('v'))){                                 #Import if update being forced with argument 
-    forceUpdate = cmdArgImport('v')
-    forceUpdate = as.logical(forceUpdate)
-  }else{
-    message("Force update not specified, not forcing update")
-  }
-}
+# --- Main code ---
 
 primaryOutputFolderName = outputFolderName
 primaryFilePrefix = filePrefix
-
 #---
-#load correlations
-CorrelationsFilenames = list.files(paste0(outputFolderName, "Alternates/"), pattern = "PairwiseCorrelationFile.rds")
-CorrelationsFilenames = CorrelationsFilenames[-grep("Merged", CorrelationsFilenames)]
-
-CorrelationsFilenames = paste0(outputFolderName, "Alternates/", CorrelationsFilenames)
-
-correlationRuns = lapply(CorrelationsFilenames, readRDS)
-
-
-#----
-#Combine correlations
-#----
-
-
-combinedCorrelations <- lapply(names(correlationRuns[[1]]), function(nm) {
+if(usingGene){
+  #load correlations
+  PairwiseCorrelationsFilenames = list.files(paste0(outputFolderName, "Alternates/"), pattern = "PairwiseCorrelationFile.rds")
+  PairwiseCorrelationsFilenames = PairwiseCorrelationsFilenames[-grep("Merged", PairwiseCorrelationsFilenames)]
+  PairwiseCorrelationsFilenames = paste0(outputFolderName, "Alternates/", PairwiseCorrelationsFilenames)
   
-  # Extract list of data frames for this comparison
-  dfs <- lapply(correlationRuns, function(x) x[[nm]])
+  pairwiseCorrelationRuns = lapply(PairwiseCorrelationsFilenames, readRDS)
   
-  n <- nrow(dfs[[1]])
   
-  data.frame(
-    Rho   = I(lapply(seq_len(n), function(i) sapply(dfs, function(df) df$Rho[i]))),
-    P     = I(lapply(seq_len(n), function(i) sapply(dfs, function(df) df$P[i]))),
-    p.adj = I(lapply(seq_len(n), function(i) sapply(dfs, function(df) df$p.adj[i])))
-  )
-})
-names(combinedCorrelations) <- names(correlationRuns[[1]])
-
-
-combinedCorrelations <- lapply(combinedCorrelations, function(df) {
   
-  #Number of significant
-  df$PNumSignificant<- sapply(df$P, function(x) sum(x < 0.05, na.rm = TRUE))
-  df$PadjNumSignificant <- sapply(df$p.adj, function(x) sum(x < 0.05, na.rm = TRUE))
+  overallCorrelationsFilenames = list.files(paste0(outputFolderName, "Alternates/Overall"), pattern = "CorrelationFile.rds")
+  overallCorrelationsFilenames = overallCorrelationsFilenames[-grep("Merged", overallCorrelationsFilenames)]
+  overallCorrelationsFilenames = paste0("Overall/", overallCorrelationsFilenames)
+  overallCorrelationsFilenames = paste0(outputFolderName, "Alternates/", overallCorrelationsFilenames)
   
-  #Max difference
-  df$RhoMaxDiff <- sapply(df$Rho, function(x) {
-    if (all(is.na(x))) return(NA_real_)
-    max(x, na.rm = TRUE) - min(x, na.rm = TRUE)
+  overallCorrelationRuns = lapply(overallCorrelationsFilenames, readRDS)
+  overallCorrelationRuns = lapply(overallCorrelationRuns, function(df) df[, -2, drop = FALSE])
+  names(overallCorrelationRuns) = rep("Overall-Overall", length(overallCorrelationRuns))
+  
+  
+  numberOfPairwiseComparisions = length(pairwiseCorrelationRuns[[1]])
+  correlationRuns = pairwiseCorrelationRuns
+  
+  for (i in seq_along(correlationRuns)) {
+    correlationRuns[[i]][(numberOfPairwiseComparisions+1)] = overallCorrelationRuns[1]
+    names(correlationRuns[[i]])[(numberOfPairwiseComparisions+1)] = "Overall"
+  }
+  
+  
+  #----
+  #Combine correlations
+  #----
+  
+  
+  combinedCorrelations <- lapply(names(correlationRuns[[1]]), function(nm) {
+    
+    # Extract list of data frames for this comparison
+    dfs <- lapply(correlationRuns, function(x) x[[nm]])
+    
+    n <- nrow(dfs[[1]])
+    
+    data.frame(
+      Rho   = I(lapply(seq_len(n), function(i) sapply(dfs, function(df) df$Rho[i]))),
+      P     = I(lapply(seq_len(n), function(i) sapply(dfs, function(df) df$P[i]))),
+      p.adj = I(lapply(seq_len(n), function(i) sapply(dfs, function(df) df$p.adj[i])))
+    )
+  })
+  names(combinedCorrelations) <- names(correlationRuns[[1]])
+  
+  
+  combinedCorrelations <- lapply(combinedCorrelations, function(df) {
+    
+    #Number of significant
+    df$PNumSignificant<- sapply(df$P, function(x) sum(x < 0.05, na.rm = TRUE))
+    df$PadjNumSignificant <- sapply(df$p.adj, function(x) sum(x < 0.05, na.rm = TRUE))
+    
+    #Max difference
+    df$RhoMaxDiff <- sapply(df$Rho, function(x) {
+      if (all(is.na(x))) return(NA_real_)
+      max(x, na.rm = TRUE) - min(x, na.rm = TRUE)
+    })
+    
+    df$PMaxDiff <- sapply(df$P, function(x) {
+      if (all(is.na(x))) return(NA_real_)
+      max(x, na.rm = TRUE) - min(x, na.rm = TRUE)
+    })
+    
+    df$PadjMaxDiff <- sapply(df$p.adj, function(x) {
+      if (all(is.na(x))) return(NA_real_)
+      max(x, na.rm = TRUE) - min(x, na.rm = TRUE)
+    })
+    
+    
+    # -------- Rho stats --------
+    df$RhoMean   <- sapply(df$Rho, function(x) mean(x, na.rm = TRUE))
+    df$RhoMedian <- sapply(df$Rho, function(x) median(x, na.rm = TRUE))
+    df$RhoSD     <- sapply(df$Rho, function(x) sd(x, na.rm = TRUE))
+    df$RhoCI95   <- sapply(df$Rho, function(x) {
+      x <- x[!is.na(x)]
+      if (length(x) < 2) return(NA_real_)
+      1.96 * sd(x) / sqrt(length(x))
+    })
+    df$RhoIQR    <- sapply(df$Rho, function(x) IQR(x, na.rm = TRUE))
+    
+    # -------- P stats --------
+    df$PMean   <- sapply(df$P, function(x) mean(x, na.rm = TRUE))
+    df$PMedian <- sapply(df$P, function(x) median(x, na.rm = TRUE))
+    df$PSD     <- sapply(df$P, function(x) sd(x, na.rm = TRUE))
+    df$PCI95   <- sapply(df$P, function(x) {
+      x <- x[!is.na(x)]
+      if (length(x) < 2) return(NA_real_)
+      1.96 * sd(x) / sqrt(length(x))
+    })
+    df$PIQR    <- sapply(df$P, function(x) IQR(x, na.rm = TRUE))
+    
+    # -------- p.adj stats --------
+    df$PadjMean   <- sapply(df$p.adj, function(x) mean(x, na.rm = TRUE))
+    df$PadjMedian <- sapply(df$p.adj, function(x) median(x, na.rm = TRUE))
+    df$PadjSD     <- sapply(df$p.adj, function(x) sd(x, na.rm = TRUE))
+    df$PadjCI95   <- sapply(df$p.adj, function(x) {
+      x <- x[!is.na(x)]
+      if (length(x) < 2) return(NA_real_)
+      1.96 * sd(x) / sqrt(length(x))
+    })
+    df$PadjIQR    <- sapply(df$p.adj, function(x) IQR(x, na.rm = TRUE))
+    
+    df
+    
+    
+    df
   })
   
-  df$PMaxDiff <- sapply(df$P, function(x) {
-    if (all(is.na(x))) return(NA_real_)
-    max(x, na.rm = TRUE) - min(x, na.rm = TRUE)
-  })
   
-  df$PadjMaxDiff <- sapply(df$p.adj, function(x) {
-    if (all(is.na(x))) return(NA_real_)
-    max(x, na.rm = TRUE) - min(x, na.rm = TRUE)
-  })
+  saveRDS(combinedCorrelations, paste0(primaryOutputFolderName, primaryFilePrefix, "AlternatesCombinedCorrelations.rds"))
   
-  
-  # -------- Rho stats --------
-  df$RhoMean   <- sapply(df$Rho, function(x) mean(x, na.rm = TRUE))
-  df$RhoMedian <- sapply(df$Rho, function(x) median(x, na.rm = TRUE))
-  df$RhoSD     <- sapply(df$Rho, function(x) sd(x, na.rm = TRUE))
-  df$RhoCI95   <- sapply(df$Rho, function(x) {
-    x <- x[!is.na(x)]
-    if (length(x) < 2) return(NA_real_)
-    1.96 * sd(x) / sqrt(length(x))
-  })
-  df$RhoIQR    <- sapply(df$Rho, function(x) IQR(x, na.rm = TRUE))
-  
-  # -------- P stats --------
-  df$PMean   <- sapply(df$P, function(x) mean(x, na.rm = TRUE))
-  df$PMedian <- sapply(df$P, function(x) median(x, na.rm = TRUE))
-  df$PSD     <- sapply(df$P, function(x) sd(x, na.rm = TRUE))
-  df$PCI95   <- sapply(df$P, function(x) {
-    x <- x[!is.na(x)]
-    if (length(x) < 2) return(NA_real_)
-    1.96 * sd(x) / sqrt(length(x))
-  })
-  df$PIQR    <- sapply(df$P, function(x) IQR(x, na.rm = TRUE))
-  
-  # -------- p.adj stats --------
-  df$PadjMean   <- sapply(df$p.adj, function(x) mean(x, na.rm = TRUE))
-  df$PadjMedian <- sapply(df$p.adj, function(x) median(x, na.rm = TRUE))
-  df$PadjSD     <- sapply(df$p.adj, function(x) sd(x, na.rm = TRUE))
-  df$PadjCI95   <- sapply(df$p.adj, function(x) {
-    x <- x[!is.na(x)]
-    if (length(x) < 2) return(NA_real_)
-    1.96 * sd(x) / sqrt(length(x))
-  })
-  df$PadjIQR    <- sapply(df$p.adj, function(x) IQR(x, na.rm = TRUE))
-  
-  df
-  
-  
-  df
-})
-
-
-saveRDS(combinedCorrelations, paste0(primaryOutputFolderName, primaryFilePrefix, "AlternatesCombinedCorrelations.rds"))
-
-message("Completed gene combinations")
+  message("Completed gene combinations")
+}
 
 #----
 #Combine enrichments
 #----
+for(j in 1:length(geneSets)){
+  geneSet = geneSets[j]
+  if(geneSet %in% validGeneArguments){
+    isGo = F
+    next()
+  }else{
+    isGo = T
+  }
 
-if(useGO){
   alternateSets = readRDS(paste0(primaryOutputFolderName, primaryFilePrefix, "AlternatePruningSpecies.rds"))
   
   
@@ -179,72 +233,69 @@ if(useGO){
   
 
   outputFolderName = paste0(outputFolderName, "Alternates/")
+  
+  
 
-  CombineGo = T
-  saveCombinedData = T
-  
-  
-  if(CombineGo){
-    for(j in 1:length(alternateSets)){
-      message(j)
-      currentAlternate = j
-      filePrefix = paste0("Alternate", j, primaryFilePrefix)
-  
-        GOResults = list()
-        for(i in 1:length(pairwiseSets)){
-          currentSet = pairwiseSets[i]
-          correlationSubsetName = gsub("-", " - ", currentSet)
-          correlationPrefix = paste(substr(strsplit(currentSet, split = "-")[[1]],1,1), collapse = '')
-          
-          goFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet,"Enrichment-", geneSet, ".rds")
-          currentGoData = readRDS(goFilename)[[1]]
-          
-          
-          
-          
-          #names(currentGoData) = paste0(correlationPrefix, "-", names(currentGoData))
-          
-    
-          GOResults[[i]] = currentGoData
-          names(GOResults)[i] = currentSet
-          
-        }
-        rm(currentGoData)
+  for(j in 1:length(alternateSets)){
+    message(j)
+    currentAlternate = j
+    filePrefix = paste0("Alternate", j, primaryFilePrefix)
+
+      GOResults = list()
+      for(i in 1:length(pairwiseSets)){
+        currentSet = pairwiseSets[i]
+        correlationSubsetName = gsub("-", " - ", currentSet)
+        correlationPrefix = paste(substr(strsplit(currentSet, split = "-")[[1]],1,1), collapse = '')
         
-        GoCombinedResults = NA
-        longestGOResult = which(sapply(GOResults, nrow) == max(sapply(GOResults, nrow)))[1]
-        for(i in 1:length(GOResults)){
-          if(all(rownames(GOResults[[i]]) == rownames(GOResults[[longestGOResult]]))){
-            cat("Combining GO Data", i, "\n")
-            GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
-          }else{
-            tryCatch({
-              cat("Mismatch in order; reordering current data to first data; Combining GO Data", i, "\n")
-              
-              which(!rownames(GOResults[[longestGOResult]]) %in% rownames(GOResults[[i]]))
-              
-              matchedOrder = match(rownames(GOResults[[longestGOResult]]), rownames(GOResults[[i]]))
-              #matchedOrder = matchedOrder[-which(is.na(matchedOrder))]
-              GOResults[[i]] = GOResults[[i]][matchedOrder,]
-              #GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
-            },error = function(e){      
-              stop("Rownames of GO results are not the same and cannot be reordered, there is an issue with the GO data.")
-            }
+        goFilename = paste0(outputFolderName, currentSet, "/", filePrefix, currentSet,"Enrichment-", geneSet, ".rds")
+        currentGoData = readRDS(goFilename)[[1]]
+        
+        
+        
+        
+        #names(currentGoData) = paste0(correlationPrefix, "-", names(currentGoData))
+        
+  
+        GOResults[[i]] = currentGoData
+        names(GOResults)[i] = currentSet
+        
+      }
+      rm(currentGoData)
+      
+      GoCombinedResults = NA
+      longestGOResult = which(sapply(GOResults, nrow) == max(sapply(GOResults, nrow)))[1]
+      for(i in 1:length(GOResults)){
+        if(all(rownames(GOResults[[i]]) == rownames(GOResults[[longestGOResult]]))){
+          cat("Combining GO Data", i, "\n")
+          GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
+        }else{
+          tryCatch({
+            cat("Mismatch in order; reordering current data to first data; Combining GO Data", i, "\n")
             
-            )
-
+            which(!rownames(GOResults[[longestGOResult]]) %in% rownames(GOResults[[i]]))
+            
+            matchedOrder = match(rownames(GOResults[[longestGOResult]]), rownames(GOResults[[i]]))
+            #matchedOrder = matchedOrder[-which(is.na(matchedOrder))]
+            GOResults[[i]] = GOResults[[i]][matchedOrder,]
+            #GoCombinedResults = cbind(GoCombinedResults, GOResults[[i]])
+          },error = function(e){      
+            stop("Rownames of GO results are not the same and cannot be reordered, there is an issue with the GO data.")
           }
+          
+          )
+
         }
-        #GoCombinedResults = GoCombinedResults[,-1]
-        
-       
-        
-        if(saveCombinedData){
-          combinedGODataFilename = paste0(outputFolderName, filePrefix, "combinedGOResults-", geneSet)
-          saveRDS(GOResults, paste0(combinedGODataFilename, ".rds"))
-        }
-    }
+      }
+      #GoCombinedResults = GoCombinedResults[,-1]
+      
+     
+      
+      if(saveCombinedData){
+        combinedGODataFilename = paste0(outputFolderName, filePrefix, "combinedGOResults-", geneSet)
+        saveRDS(GOResults, paste0(combinedGODataFilename, ".rds"))
+      }
   }
+  
   message("Completed GO combinations for individual alternates")
   
   #---- 

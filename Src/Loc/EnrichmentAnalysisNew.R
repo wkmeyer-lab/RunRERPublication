@@ -14,64 +14,53 @@ if(!clusterRun){library(xlsx)}
 #When running on the command line, note that the arguments should be formatted as:
 #r=Prefix v=forceUpdateValue etc
 #Rather than being in quotes and separated by commas. 
-#Terminal uses spaces to split indexes in a vector, where r uses indepent quotation and commas.
+#Terminal uses spaces to split indexes in a vector, where r uses independent quotation and commas.
 
 
 # -- Command arguments list
-# r = filePrefix                            This is a prefix used to organize and separate files by analysis run. Always required. 
-# v = <T or F>                              This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
-# m = gmtFileLocation.gmt                   This is the location of the main gmt file
-# p = <T or F or C>                         This sets if the code should use permulated or unpermulated values. If set to "C", will use permulations for categorical values, which are stored in the main file.
-# s = "subdirectoryName"                    This is used to specify a subdirectory for the analysis to be run in. Primarily used for the components of categorical results. 
-# c = "correlationFileOverride.rds"         This can be used to manually set the correlation file. Used primarily to target pairwise comparisons of categorical phenotypes.
-# f = "permulationPvalueFileLocation.rds"   This is a manual override to specify the script use a specific Permulation p-value file.
-    #If using any file other than "CombinedPrunedFastAll" with no run instance number, it must be specified manually.
+# r = filePrefix                                                                This is a prefix used to organize and separate files by analysis run. Always required. 
+# v = <T or F>                                                                  This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
+# g = gmtFileLocation.gmt                                                       This is the location of the main gmt file
+# p = <T or F or C>                                                             This sets if the code should use permulated or unpermulated values. If set to "C" or "A", will use permulations for categorical values, which are stored in the main file. 
+# s = "subdirectoryName"                                                        This is used to specify a subdirectory for the analysis to be run in. Primarily used for the components of categorical results. 
+# y = "correlationFileOverride.rds"                                             This can be used to manually set the correlation file. Used primarily to target pairwise comparisons of categorical phenotypes.
+# z = "permulationPvalueFileLocation.rds"                                       This is a manual override to specify the script use a specific Permulation p-value file.
+    #If using permulations in a binary analysis, and using any file other than "CombinedBinaryPermulationsPValue" with no run instance number, it must be specified manually.
+
+
 #----------------
-#'m=c("Data/tissue_specific.gmt", "Data/GSEA-c5-HsSymbols.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")'
-#'m=c("Data/DisGeNET.gmt", "Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt")'
 
-
-
-args = c('r=ComplexDietCentralAnalysisSimplify2', 'm=c("Data/KeggReactome.gmt"")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
-args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 'm=c("Data/KeggReactome.gmt"")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
-args = c('r=ComplexDietCentralAnalysisSimplifyAltReconstruction', 'm=c("Data/KeggReactome.gmt"")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
-
-
-args = c('r=ComplexDietCentralAnalysisSimplify2', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
-args = c('r=ComplexDietCentralAnalysisSimplifyExclusivePred', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
-args = c('r=ComplexDietCentralAnalysisSimplifyAltReconstruction', 'm=c("Data/MGI_Mammalian_Phenotype_Level_4.gmt", "Data/GO_Biological_Process_2023.gmt", "Data/tissue_specific.gmt", "Data/EnrichmentHsSymbolsFile2.gmt")', 'p=F', 's=c("Invertivore-Vertivore", "Herbivore-Vertivore", "Invertivore-Omnivore", "Herbivore-Omnivore", "Herbivore-Invertivore", "Carnivore-Herbivore", "Overall")' )
-
-
-# --- Standard start-up code ---
-if(clusterRun){args = commandArgs(trailingOnly = TRUE)}
-{  # Bracket used for collapsing purposes
-  #File Prefix
-  if(!is.na(cmdArgImport('r'))){
-    filePrefix = cmdArgImport('r')
-  }else{
-    stop("THIS IS AN ISSUE MESSAGE; SPECIFY FILE PREFIX")
+{
+  # --- Standard start-up code ---
+  if(clusterRun){args = commandArgs(trailingOnly = TRUE)}
+  {  # Bracket used for collapsing purposes
+    #File Prefix
+    if(!is.na(cmdArgImport('r'))){
+      filePrefix = cmdArgImport('r')
+    }else{
+      stop("THIS IS AN ISSUE MESSAGE; SPECIFY FILE PREFIX")
+    }
+    
+    #  Output Directory 
+    if(!dir.exists("Output")){                                      #Make output directory if it does not exist
+      dir.create("Output")
+    }
+    outputFolderNameNoSlash = paste("Output/",filePrefix, sep = "") #Set the prefix sub directory
+    if(!dir.exists(outputFolderNameNoSlash)){                       #create that directory if it does not exist
+      dir.create(outputFolderNameNoSlash)
+    }
+    outputFolderName = paste("Output/",filePrefix,"/", sep = "")
+    
+    #  Force update argument
+    forceUpdate = FALSE
+    if(!is.na(cmdArgImport('v'))){                                 #Import if update being forced with argument 
+      forceUpdate = cmdArgImport('v')
+      forceUpdate = as.logical(forceUpdate)
+    }else{
+      message("Force update not specified, not forcing update")
+    }
   }
-  
-  #  Output Directory 
-  if(!dir.exists("Output")){                                      #Make output directory if it does not exist
-    dir.create("Output")
   }
-  outputFolderNameNoSlash = paste("Output/",filePrefix, sep = "") #Set the prefix sub directory
-  if(!dir.exists(outputFolderNameNoSlash)){                       #create that directory if it does not exist
-    dir.create(outputFolderNameNoSlash)
-  }
-  outputFolderName = paste("Output/",filePrefix,"/", sep = "")
-  
-  #  Force update argument
-  forceUpdate = FALSE
-  if(!is.na(cmdArgImport('v'))){                                 #Import if update being forced with argument 
-    forceUpdate = cmdArgImport('v')
-    forceUpdate = as.logical(forceUpdate)
-  }else{
-    message("Force update not specified, not forcing update")
-  }
-}
-
 # --- Argument Imports ---
 # Defaults
 gmtFileLocation = "Data/enrichmentGmtFile.gmt"
@@ -83,11 +72,16 @@ correlationOverride = NULL
 useCategoricalPermulations = FALSE
 useSubdirectory = FALSE
 subdirectoryValueList = NULL
+validGeneArguments = c("NULL", "gene", "Gene")
 
 { # Bracket used for collapsing purposes
   #Gmt file location
-  if(!any(is.na(cmdArgImport('m')))){
-    gmtFileLocation = cmdArgImport('m')
+  if(!any(is.na(cmdArgImport('g')))){
+    gmtFileLocation = cmdArgImport('g')
+    
+    #remove any arguments which tell later scripts to run a gene analysis 
+    gmtFileLocation = gmtFileLocation[-which(gmtFileLocation %in% validGeneArguments)]
+    
   }else{
     paste("No gmt location arugment, using Data/enrichmentGmtFile.gmt")                          #Report using default
     message("No gmt location arugment, using Data/enrichmentGmtFile.gmt")
@@ -96,7 +90,7 @@ subdirectoryValueList = NULL
   #Permulation use
   if(!is.na(cmdArgImport('p'))){
     usePermulations = cmdArgImport('p')
-    if(usePermulations == "C"){
+    if(usePermulations %in% c("C","A")){
       usePermulations = TRUE
       useCategoricalPermulations = TRUE
     }
@@ -110,18 +104,20 @@ subdirectoryValueList = NULL
   }
   if(usePermulations){
     #Import permulation p-value Override 
-    if(!is.na(cmdArgImport('f'))){
+    if(!is.na(cmdArgImport('z'))){
       usePermulationPValOverride = TRUE
-      permulationPValOverride = cmdArgImport('f')
+      permulationPValOverride = cmdArgImport('z')
       message("Using Manually specified permulation p-value file.")
     }else{
-      message("No Permulation pValue override, using standard CombinedPrunedFastAllPermulationsPValue.rds.")
+      if(!useCategoricalPermulations){
+        message("No Permulation pValue override, using standard CombinedBinaryPermulationsPValue.rds.")
+      }
     }
   }
   #Import correlation file override
-  if(!is.na(cmdArgImport('c'))){
+  if(!is.na(cmdArgImport('y'))){
     useCorrelationOverride = TRUE
-    correlationOverride = cmdArgImport('c')
+    correlationOverride = cmdArgImport('y')
     message("Using Manually specified correlation file.")
   }else{
     message("No corelation override specified.")
@@ -143,7 +139,7 @@ subdirectoryValueList = NULL
       useSubdirectory = TRUE
       subdirectoryValueList = folderNames
       subdirectoryValueList = subdirectoryValueList[!(subdirectoryValueList == "Alternates")]
-      message("Folders not specified, using all folders but Alternates. Note that if driver analysis is active, this may cause issues.")
+      message("Folders not specified, using all folders but Alternates.")
     }else{
       message("Using main directory")
     }
@@ -179,7 +175,7 @@ for(i in 1:length(subdirectoryValueList)){
       if(usePermulationPValOverride){                                               #check for a location override
         permulationFileLocation = paste(outputFolderName, permulationPValOverride, sep="")                           #if so, use it 
       }else{                                                                        #if not, use the default 
-        permulationFileLocation = paste(outputFolderName, filePrefix, "CombinedPrunedFastAllPermulationsPValue.rds", sep= "") #get the default location based on prefix 
+        permulationFileLocation = paste(outputFolderName, filePrefix, "CombinedBinaryPermulationsPValue.rds", sep= "") #get the default location based on prefix 
       }
       permulationValues = readRDS(permulationFileLocation)                          #read the permulation file
       if(ncol(permulationValues)>1){                                              # add handling for continuous permulations having two columns
@@ -204,7 +200,8 @@ for(i in 1:length(subdirectoryValueList)){
   #Load the gmt annotations 
   gmtAnnotations = read.gmt(gmtFileLocation[j])                                      #read the gmt file
   annotationsList = list(gmtAnnotations)                                          #reformat it into the format the next fuction expects
-  enrichmentListName = substring(gmtFileLocation[j], 6, last = (nchar(gmtFileLocation[j]) - 4)) #make a geneset name based on the filename 
+  enrichmentListName = sub("\\.gmt$", "", sub(".*/", "", gmtFileLocation[j])) #subset the file location to only the set's Name
+  #enrichmentListName = substring(gmtFileLocation[j], 6, last = (nchar(gmtFileLocation[j]) - 4)) #Old code to make a set name based on the file name. 
   names(annotationsList) = enrichmentListName                                     #name geneset list with that name 
   
   enrichmentResult = fastwilcoxGMTall(rerStats, annotationsList, outputGeneVals = T, num.g =2) #run enrichment analysis 

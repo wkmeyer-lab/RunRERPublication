@@ -20,10 +20,7 @@ library(data.table)
 # o = <T or F>                        This value is used to run only the p value calculation, and not the combination. 
 
 #----------------
-args = (c('r=ComplexDietCentralAnalysisSimplify2', "n=650", "p=T"))
-
-
-
+args = (c('r=CategoricalDiet3Phen', "n=2", "t=Dev"))
 # --- Standard start-up code ---
 args = commandArgs(trailingOnly = TRUE)
 {  # Bracket used for collapsing purposes
