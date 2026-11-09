@@ -1,16 +1,20 @@
+# RunRER Walkthrough
+
 Welcome to RunRER! This is a wrapper package that is meant to make running RERConverge simple and easy, allowing you to rapidly iterate through datasets, phenotypes, and pruning methods. 
 
 It is recommended that you read the Walk through from the main RERConverge repo, to understand what the tool is, what it is measuring, and how it works. This walk through will only cover how to use the scripts this package includes. 
 
 
-FUNDAMENTAL PHILOSOPHY  
+## FUNDAMENTAL PHILOSOPHY
+
 The driving principle of this package is that no new code should need to be written to run an RERConverge analysis. 
 As such, this package is controlled using ARGS, or specific inputs provided to pre-written scripts, that allow you to modify settings and reuse them in new analyses. 
 Additionally, this package is designed so that it can run any number of RERConverge analyses, without them interfering with each other. As such, each analysis has its own *analysis prefix*, which is connected to all files from that analysis. Each analysis has its own folder in the Output directory, and all files have the analysis prefix attached to them. As such, the analysis prefix is also called a *file prefix*. 
 All of the scripts in this package are made to be run as-is both locally, and on a cluster. If running the script locally, **ensure that you do not run the "clusterRun = T" line of code.**
 
 
-ARGs --   WHAT THEY ARE, AND HOW TO USE THEM.
+### **ARGs --   WHAT THEY ARE, AND HOW TO USE THEM.**
+
 ARGs (short for arguments) is how you pass information to any of the included scripts. They are what allow you to change the settings of a script, or change what data it is processing. 
 These ARGS are designed in such a way that the code can be easily run either locally, or by running the relevant R script on a supercomputing cluster. 
 ARGS are formatted as follows: 
@@ -25,30 +29,37 @@ Second I have the content I want to deliver. In this example, we want to run on 
 Therefore, the content I want to deliver is **c("gene", "exampleGeneSet1", "exampleGeneSet2")**. This is R code for a vector, and can be used as the content of an ARG directly. 
 
 ARGS are formatted slightly differently if you are running scripts locally, or on a cluster. This is due the the difference in how shell and R split entries in a vector. 
-  In shell, the arguments are separated by spaces, and any command characters (like quotes, or parentheses) need to be escaped (have a \ in front of them), so that they are not interpreted by shell. In R, the arguments are included as separate strings in a vector. Below is an example of that argument, in both formats. 
+  In shell, the arguments are separated by spaces, and any command characters (like quotes, or parentheses) need to be escaped (have a \\ in front of them), so that they are not interpreted by shell. In R, the arguments are included as separate strings in a vector. Below is an example of that argument, in both formats. 
   
   LOCAL:
+  
   `
   'g=c("gene", "exampleGeneSet1", "exampleGeneSet2")'
   `  
-    NOTE how the quotes that wrap around the ARG are different from the ones in the ARG. 
+  
+  NOTE how the quotes that wrap around the ARG are different from the ones in the ARG. 
   
   SHELL / CLUSTER:
+  
   `
   g=c\(\"gene\"\,\"exampleGeneSet1\"\,\"exampleGeneSet2\"\)
   `
-    NOTE how the cluster ARG does not contain any spaces within an ARG.
+  
+  NOTE how the cluster ARG does not contain any spaces within an ARG.
 
 For each script, you will have multiple things that change between analyses, so you will need to submit multiple ARGs. As before, how you submit multiple ARGs varies slightly when running locally or on a cluster. Locally, the multiple ARGs are included as a vector of strings. On a cluster, each ARG is separated by a space. 
 For this example, we will use an analysis prefix ('r') of **"ArgumentExample"** as our second argument. Examples for both local and cluster use have been included below. 
 
   LOCAL:
+  
   `
   args = c('r=ArgumentExample', 'g=c("gene", "exampleGeneSet1", "exampleGeneSet2")')
   `
+  
     NOTE how if the ARG is only a single string, it only needs one set of quotes. It is proccessed into a string automatically. 
   
   SHELL / CLUSTER:
+  
   `
   r=ArgumentExample g=c\(\"gene\"\,\"exampleGeneSet1\"\,\"exampleGeneSet2\"\)
   `
@@ -57,27 +68,31 @@ From here on, ARGs will be presented in their locally run format, as that is lik
 
 
 
-RUNNING THIS PIPELINE -- WHAT DO I DO?
+### RUNNING THIS PIPELINE -- WHAT DO I DO?
 
 This pipeline has two main steps. These two steps are: 
+
   1) Phenotype Tree Generation
+  
   2) Analysis
-They are separated for a few reasons. Primarily, phenotype tree generation (and ancestral trait reconstruction) is the step that has the most inputs, has the most variance (due to potential differences in ancestral state reconstruction decisions), and is the most likely to be subject to (user or input data) errors. As such, it benefits the most from being checked manually, and potentially re-run to make changes before continuing with the analysis. Additionally, it both runs quickly and produces very small output files, and thus can easily be run locally. Additionally, phenotype tree creation uses so many unique arguments that separating phenotype tree creation into a separate set of ARG indexes allows the ARG indexes in each step to be more relevant to the ARG they refer to. 
+  
+They are separated for a few reasons. Primarily, phenotype tree generation (and ancestral trait reconstruction) is the step that has the most inputs, has the most variance (due to potential differences in ancestral state reconstruction decisions), and is the most likely to be subject to errors (from either the user or input data). As such, it benefits the most from being checked manually, and potentially re-run to make changes before continuing with the analysis. Additionally, it both runs quickly and produces very small output files, and thus can easily be run locally. Additionally, phenotype tree creation uses so many unique arguments that separating phenotype tree creation into a separate set of ARG indexes allows the ARG indexes in each step to be more relevant to the ARG they refer to. 
 
 
 This pipeline has two main input data sources. They are:
-  1) Gene Trees (mainTrees object)
-      This provides evolutionary rate data for species and genes. 
-  2) Phenotype Data 
-      This is a spreadsheet with (at least) the species' phenotype data, names as they appear in the gene trees, and scientific names. 
+
+  1) Gene Trees (mainTrees object).     This provides evolutionary rate data for species and genes. 
+
+  2) Phenotype Data.      This is a spreadsheet with (at least) the species' phenotype data, names as they appear in the gene trees, and scientific names. 
 
 
-RUNNING THE PIPELINE -- STEP 0: Prepare your data.
+### RUNNING THE PIPELINE -- STEP 0: Prepare your data.
 
 Data preparation for this pipeline is simple. You only need the file locations, and relevant column names. However, you do need the location of the two input files. 
 
 
-  TREES FILE
+  **TREES FILE**
+  
 The Trees file is an RERConverge mainTrees object, which contains gene trees, as well as a master tree. This can be stored either as a .txt file, or a .rds file. The scripts can process both, but a .rds file is recommended, as it loads far faster. 
 In this walkthrough, we will use the *toytrees* installed with RERConverge as our Gene Tree data. I have included a .rds version of this file, for fast load times. It can be found at:
 
@@ -87,7 +102,8 @@ Data/toyTrees.rds
 
 
 
-  PHENOTYPE DATA
+  **PHENOTYPE DATA**
+  
 This pipeline can handle phenotype data from a .csv file with any column names, so long as the spreadsheet includes: 1) The phenotype data 2) The species name as it appears in the gene trees and 3) The species' scientific name. You also need to know the name of the columns that information is stored in. The scripts have a few column names which they will check by default for that information, but if it is not one of those pre-sets, it will not be able to do species name conversion automatically. This will not affect the results, other than not displaying common names on trees.  
 
 In this walkthrough, I have provided example data, which can be found at *examplePhenotypeData.csv* in the *Data* folder. 
@@ -99,14 +115,14 @@ Data/examplePhenotypeData.csv
 This data file intentionally includes reasonable (but somewhat odd) column names, to demonstrate the column specification functions. Open the file to see the column names. 
 
 
-RUNNING THE PIPELINE -- STEP 1: MAKE A PHENOTYPE TREE
+### RUNNING THE PIPELINE -- STEP 1: MAKE A PHENOTYPE TREE
 
 In this tutorial, we will be creating a categorical phenotype tree. For a binary or continuous phenotype, use MakeContinousPheontypeTree.R or MakeBinaryPhenotypeTree.R, and their respective arguments, instead. 
 
-The first step is to open up the relevant script. In this case, MakeCategoricalPhenotypeTree. Near the top of the script, you will find a list of ARGs for that script, and descriptions for them. In this case, that is as follows: 
+The first step is to open up the relevant script. In this case, **MakeCategoricalPhenotypeTree.R**. Near the top of the script, you will find a list of ARGs for that script, and descriptions for them. In this case, that is as follows: 
 
-`
-# -- Command arguments list
+```
+# - Command arguments list
 # - required -
 # r = filePrefix                                         This is a prefix used to organize and separate files by analysis run. Always required. 
 # v = <T or F>                                           This prefix is used to force the regeneration of the script's output, even if the files already exist. Not required, not always used.
@@ -129,14 +145,17 @@ The first step is to open up the relevant script. In this case, MakeCategoricalP
 # p = "c('prunedtip1', 'prunedtip2')"                    This allows you to manually specify additional branches to be pruned
 # l = <T or F>                                           DO NOT USE UNLESS SPECIFIED -- This determines if the liam infrence nodes should be added 
 # e = <T or F>                                           This sets if alternate species sets should be created. 
-`
+```
 
-For this example, we will be using a file prefix of *walkthroughExample*. We also won't need to change any of the optional, or pruning arguments. However, we will turn "alternate species set generation" to ON, to demonstrate those functions. Alternate species sets are only different from the main analysis if pruning was performed, but have (identical) alternates will allow for demonstration of the alternate scripts. 
+For this example, we will be using a file prefix of *walkthroughExample*. We also won't need to change any of the optional, or pruning arguments. However, we will turn "alternate species set generation" to ON, to demonstrate those functions. Alternate species sets are only different from the main analysis if pruning was performed, but having (identical) alternates will allow for demonstration of the alternate scripts. 
+
 The *forceupdate* ARG is useful when debugging, or redoing an analysis, to make sure that your changes are saved. However, it's best to leave it off most of the time, as it will allow the scripts to run much faster by reusing work from previous scripts (or previous iterations of the same script).
+
 
 
 **With that information, see how many of the ARGs you can figure out on your own.**
 
+```
 
 
 
@@ -145,17 +164,31 @@ The *forceupdate* ARG is useful when debugging, or redoing an analysis, to make 
 
 
 
+This space left intentionally blank. 
+
+
+
+
+
+
+
+
+
+```
 Here is a list of the ARGs that we will be using:
-filePrefix: r=walkthroughExample
+
+```
+filePrefix: r=walkthroughExample 
 forceUpdate: v=F
 mainTreesFilename: m=Data/toyTrees.rds
 spreadsheetName: d=Data/examplePhenotypeData.csv
 annotColumn: a=myPhenotype
 nameColumn: n=toyTips
 categories: c=c("Land", "Aquatic", "Flying", "SemiAquatic")
-
+```
 
 Here are those ARGs organized to be run locally: 
+
 `
 args = c('r=walkthroughExample', 'v=F', 'm=Data/toyTrees.rds', 'd=Data/examplePhenotypeData.csv', 'a=myPhenotype', 'n=toyTips', 'c=c("Land", "Aquatic", "Flying", "SemiAquatic")')
 `
@@ -165,15 +198,19 @@ If we wanted, we could use that set of ARGs to run a generate a phenotype tree. 
 
 
 The ARG to do that is as follows: 
-u = list(c("SemiAquatic", "Aquatic"))
+```
+mergedCategories: u=list(c("SemiAquatic", "Aquatic"))
+```
 
 To an updated set of ARGs is: 
+
+
 `
-args = c('r=walkthroughExample', 'v=F', 'm=Data/toyTrees.rds', 'd=Data/examplePhenotypeData.csv', 'a=myPhenotype', 'n=toyTips', 'c=c("Land", "Aquatic", "Flying", "SemiAquatic")', u = list(c("SemiAquatic", "Aquatic")))
+args = c('r=walkthroughExample', 'v=F', 'm=Data/toyTrees.rds', 'd=Data/examplePhenotypeData.csv', 'a=myPhenotype', 'n=toyTips', 'c=c("Land", "Aquatic", "Flying", "SemiAquatic")', 'u=list(c("SemiAquatic", "Aquatic"))')
 `
 
 
-**Open MakeCategoricalPhenotypeTree.R**, and run the script using that arg set. You can either copy the args in at the top of the script, run the code in this window (saving it in the environment), or run it in the console. 
+Open **MakeCategoricalPhenotypeTree.R**, and run the script using that arg set. You can either copy the args in at the top of the script, run the code in this window (saving it in the environment), or run it in the console. 
   When running the code locally **make sure to NOT run the `clusterRun = T` line**! This sets if the script should look for ARGs inside the args variable we just made, or as inputs from a command line launch. This line is enabled by default, so that it *is* run when the code is executed on a cluster. 
   Also, make sure to not overwrite your `args` with a line of `args` inside the script! 
   
@@ -182,12 +219,13 @@ Once the script has completed, go to the analysis' output folder (in this case, 
   
   
 
-RUNNING THE PIPELINE -- STEP 2: RUN THE ANALYSES 
+### RUNNING THE PIPELINE -- STEP 2: RUN THE ANALYSES 
 
 All of the remaining analysis scripts can use the same set of ARGs. This is done intentionally, so that they can all be submitted to the cluster at once, with one shared ARGs set. shell scripts to launch the scripts on a cluster will vary by cluster, but an example can be found at *Src/Loc/Dev/FullRunMark2.sh*. 
 
 The order to run the scripts are as follows: 
-`
+
+```
 RunRERAndCorrelation.R
 (Optional) RunMergedAnalysis.R
 EnrichmentAnalysisNew.R
@@ -198,17 +236,18 @@ ProcessAlternates.R
 RunAlternateEnrichments.R
 CombineAlternates.R
 AddAlternatesToCombinations.R
-`
+```
+
 Each of these scripts can be run sequentially, using the same ARG set. Note that, when running locally **make sure to NOT run the `clusterRun = T` line!**. This means you will either need to comment out that line before executing the full script, or run the script line-by-line (by holding shift+enter) on every line following the `clusterRun = T` line. 
 
-The Alternate scripts are used to ru analyses on alternative species sets. If you try to run them locally (or without an 'i' argument), they will attempt to complete on each alternate in sequence. While this works, it is *strongly not advised*, because run times can exceed days in length. Instead, run these scripts multiple times, each with a distinct 'i' ARG. An example of how to do this on a cluster can be found in *Src/Loc/Dev/FullRunMark2.sh*. Using a cluster is strongly advised if using alternate species sets. 
+The Alternate scripts are used to run analyses on alternative species sets. If you try to run them locally (or without an 'i' argument), they will attempt to complete on each alternate in sequence. While this works, it is **strongly not advised**, because run times can exceed days in length. Instead, run these scripts multiple times, each with a distinct 'i' ARG. An example of how to do this on a cluster can be found in *Src/Loc/Dev/FullRunMk3.sh*. Using a cluster is strongly advised if using alternate species sets. 
 
 
 
 
 Here is a complied list of ARGs for the analysis scripts. 
 
-`
+```
 ---------------------------------------------------------------------
 # --- Merged Argument IDs  --- 
 # --------------------------------------------------------------------
@@ -238,28 +277,41 @@ Here is a complied list of ARGs for the analysis scripts.
 # u = phenotypeTreeFilename.txt or .rds                                         OPTIONAL OVERRIDE: This can be used to manually override the phenotype tree being used. For continuous analyses, this is the location of the trait vector.
 # y = "correlationFileOverride.rds"                                             This can be used to manually set the correlation file. Used primarily to target pairwise comparisons of categorical phenotypes.
 # z = "permulationPvalueFileLocation.rds"                                       This is a manual override to specify the script use a specific Permulation p-value file.
-`
+```
 
 As before, we will not need to alter any of the optional ARGs, or any of the override ARGs. However, I will describe the function of a few notable ones:
-The 's' ARG can be used to run the script on only a portion of subdirectories (For example, to some pairwise analyses, but not others; or giving a list of all of the output directories if you have manually placed other directories in the analysis' output folder; etc.). However, we will want to run the analyses on all of the pairwise comparisons, so it can be left undefined. 
+The `s` ARG can be used to run the script on only a portion of subdirectories (For example, to some pairwise analyses, but not others; or giving a list of all of the output directories if you have manually placed other directories in the analysis' output folder; etc.). However, we will want to run the analyses on all of the pairwise comparisons, so it can be left undefined. 
 
-The 'e' and 't' arguments can be used to have the script run two versions of the analysis: one with all of the categories as separate phenotypes, and a second where some are merged into a single phenotype. For example, having "Vertivory", "Invertivory" (separate), and "Combined Predators" (merged) within a single analysis. We could have, for example, used this on SemiAquatic and Aquatic, instead of combining them during tree creation.  
+The `e` and `t` arguments can be used to have the script run two versions of the analysis: one with all of the categories as separate phenotypes, and a second where some are merged into a single phenotype. For example, having "Vertivory", "Invertivory" (separate), and "Combined Predators" (merged) within a single analysis. We could have, for example, used this on SemiAquatic and Aquatic, instead of combining them during tree creation.  
 
-
+ 
 
 
 For the required arguments, several are shared with our phenotype tree creation:
-`
+
+```
 filePrefix: r=walkthroughExample
 forceUpdate: v=F
 mainTreesFilename: m=Data/toyTrees.rds
-`
+```
 
 The remaining required arguments can be described as follows: Permulations are beyond the scope of this walkthrough, so we will not be using them. Because this defaults to "FALSE", we could leave it unspecified, but for this example, please specify the value. We are performing a categorical analysis, so the phenotype type should be set to 'g'. Finally, as mentioned above, this example will be run using the "gene", "exampleGeneSet1", and "exampleGeneSet2" gene sets. The "gene" geneset tells the combination scripts to run on gene values, rather than a gene set, and thus does not require a .gmt file. It can be included as-is within the argument. The other two gene sets need a full file path. They have been included in the data folder, as *exampleGeneSet1.gmt* and *exampleGeneSet2.gmt*
 
 
 **With that information, see how many of the ARGs you can figure out on your own.**
 
+```
+
+
+
+
+
+
+
+
+
+
+This space left intentionally blank. 
 
 
 
@@ -271,20 +323,22 @@ The remaining required arguments can be described as follows: Permulations are b
 
 
 
-
+```
 
 The remaining require ARGs are as follows: 
-`
+
+```
 permulations: p=F
 analysisType: a=g
 gmt files: g=c("gene", "Data/exampleGeneSet1.gmt", "Data/exampleGeneSet2.gmt")
-`
+```
 
 A full ARGs set, formatted to be run locally, is as follows: 
+
 `
 args = c('r=walkthroughExample', 'v=F', 'm=Data/toyTrees.rds', 'p=F', 'a=g', 'g=c("gene", "Data/exampleGeneSet1.gmt", "Data/exampleGeneSet2.gmt")')
 `
 
-**Open RunRERAndCorrelation.R**, and run that script using the above ARGs. Qhen running locally **make sure to NOT run the `clusterRun = T` line!**.
-Once that is compelte, you will have RER results in the analysis' output folder. Because we are not running a merged analysis, that script can be skipped. Open **EnrichmentAnalysisNew.R**, and run it using the same args. It should run three times in total, once for each specific gene set (including "gene"). FInally, open and run **CategoricalCombinePairwiseResults.R**. When that script completes, you can find the combined outputs in the top folder of the anaylsis' output. GO ahead and look through both the gene and gene set results!
+Open **RunRERAndCorrelation.R**, and run that script using the above ARGs. When running locally **make sure to NOT run the `clusterRun = T` line!**.
+Once that is complete, you will have RER results in the analysis' output folder. Because we are not running a merged analysis, that script can be skipped. Open **EnrichmentAnalysisNew.R**, and run it using the same args. It should run three times in total, once for each specific gene set (including "gene"). Finally, open and run **CategoricalCombinePairwiseResults.R**. When that script completes, you can find the combined outputs in the top folder of the analysis' output. Go ahead and look through both the gene and gene set results!
 

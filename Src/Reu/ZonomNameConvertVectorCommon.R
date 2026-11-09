@@ -2,7 +2,12 @@
 # Convert names of one type to another type based on two columns in a specified spreadsheet. 
 
 
-ZonomNameConvertVectorCommon = function(namesVector, toScientific = F, annotationLocation = "Data/mergedData.csv", scientificColumn = c("ScientificName","ScientificNames", "ScientificNameFull", "Scientific Name Full", "Scientific Name", "Scientific Names", "scientificBinomial", "scientific Binomial", "scientificBinomials", "scientific Binomials"), commonColumn = c("CommonName", "CommonNames", "Common Name", "Common Names"), tipColumn = "tipName"){
+ZonomNameConvertVectorCommon = function(namesVector, 
+                                        toScientific = F, 
+                                        annotationLocation = "Data/mergedData.csv", 
+                                        scientificColumn = c("ScientificName","ScientificNames", "ScientificNameFull", "Scientific Name Full", "Scientific Name", "Scientific.Names", "Scientific.Name.Full", "Scientific.Name", "Scientific.Names","scientificBinomial", "scientific Binomial", "scientific.Binomial", "scientificBinomials", "scientific Binomials", "scientific.Binomials"), 
+                                        commonColumn = c("CommonName", "CommonNames", "Common Name", "Common Names", "Common.Name", "Common.Names"), 
+                                        tipColumn = "tipName"){
   names = namesVector                                                    #make a vector of the names
   manualAnnot = read.csv(annotationLocation)                     #import manual annots file
   tipColumnNumber = which(names(manualAnnot) == tipColumn)
